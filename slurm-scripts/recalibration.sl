@@ -1,0 +1,147 @@
+#!/bin/bash
+#SBATCH --job-name		Recalibration
+#SBATCH --time			359
+#SBATCH --mem-per-cpu	4096
+#SBATCH --cpus-per-task	8
+#SBATCH --array			1-84
+#SBATCH --error			slurm/RC_%A_%a.out
+#SBATCH --output		slurm/RC_%A_%a.out
+
+echo "$(date) on $(hostname)"
+
+source /resource/pipelines/Fastq2VCF/baserefs.sh
+
+function usage {
+cat << EOF
+
+*************************************
+* This script spool up an alignment *
+* run for the specified patient ID  *
+* on the DSMC cluster.              *
+*************************************
+*
+* usage: $0 options:
+*
+*********************************
+*
+* Optional:
+*   -h             Print help/usage information.
+*   -i [FILE]      Input file.
+*                  If no input specified will search in ${pwd}/markdup/${CONTIG}.bam
+*   -o             WIP
+*                  Path to final output location.
+*                  Defaults to /scratch/$USER
+*   -r             Full path to reference file.
+*                  Default: /resource/bundles/human_g1k_v37/human_g1k_v37_decoy
+*
+*********************************
+EOF
+}
+
+while getopts "hi:o:r:" OPTION
+do
+	case $OPTION in
+		h)
+			usage
+			exit 0
+			;;
+		i)
+			if [ ! -e ${OPTARG} ]; then
+				(echo "FAIL: Input file $OPTARG does not exist!" 1>&2)
+				exit 1
+			fi
+			export FILE_LIST=(${FILE_LIST[@]} ${OPTARG})
+			(printf "%-22s%s\n" "Input file" $OPTARG 1>&2)
+			;;
+		o)
+			export OUTPUT_DIR=${OPTARG}
+			(printf "%-22s%s\n" "Final datastore" $OUTPUT_DIR 1>&2)
+			;;
+		r)
+			export REF=${OPTARG}
+			if [ ! -e $REF ]; then
+				(echo "FAIL: $REF does not exist" 1>&2)
+				exit 1
+			fi
+			export REFA=$REF.fasta
+			(printf "%-22s%s\n" "Reference sequence" $REF 1>&2)
+			;;
+		?)
+			(echo "FAILURE: ${OPTION} ${OPTARG} is not valid!" 1>&2)
+			usage
+			exit 1
+			;;
+	esac
+done
+
+CONTIG=${CONTIGBLOCKS[$SLURM_ARRAY_TASK_ID]}
+
+# INPUT is either specified single file or contig dependent entry.
+[ "${#FILE_LIST[@]}" -lt "1" ] && \
+	INPUT=markdup/${CONTIG}.bam || \
+	INPUT=${FILE_LIST[0]}
+
+  BQSR=bqsr_${CONTIG}.firstpass
+OUTPUT=printreads/${CONTIG}.bam
+
+HEADER="RC"
+
+echo "$HEADER: ${INPUT} -> BQSR -> ${OUTPUT}"
+
+
+# Make sure input and target folders exists and that output file does not!
+if ! inFile;  then exit $EXIT_IO; fi
+if ! outDirs; then exit $EXIT_IO; fi
+if ! outFile; then exit $EXIT_IO; fi
+
+INPUT_BAI=${INPUT%.*}.bai
+if [ ! -e $INPUT_BAI ]; then
+	echo "WARN: $INPUT_BAI does not exist. Creating..."
+	module load SAMtools
+	scontrol update jobid=${SLURM_ARRAY_JOB_ID}_${SLURM_ARRAY_TASK_ID} name=${IDN}_Indexing_BAM_${CONTIG}_$SLURM_ARRAY_TASK_ID
+	samtools index $INPUT $INPUT_BAI
+	module purge
+fi
+
+module purge
+module load GATK
+HEADER="BR"
+
+CMD="srun $(which java) ${JAVA_ARGS} -jar $EBROOTGATK/GenomeAnalysisTK.jar ${GATK_BSQR} -L ${CONTIG} ${GATK_ARGS} -I ${INPUT} -o ${JOB_TEMP_DIR}/${BQSR}"
+echo "$HEADER: ${CMD}" | tee -a commands.txt
+
+JOBSTEP=0
+ 
+scontrol update jobid=${SLURM_ARRAY_JOB_ID}_${SLURM_ARRAY_TASK_ID} name=${IDN}_BaseRecal_${CONTIG}_$SLURM_ARRAY_TASK_ID
+
+if ! ${CMD}; then
+	cmdFailed $?
+	exit ${JOBSTEP}${EXIT_PR}
+fi
+
+BR_SECONDS=$SECONDS
+SECONDS=0
+
+HEADER="PR"
+
+CMD="srun $(which java) ${JAVA_ARGS} -jar $EBROOTGATK/GenomeAnalysisTK.jar ${GATK_READ} -L ${CONTIG} ${GATK_ARGS} -I ${INPUT} -BQSR ${JOB_TEMP_DIR}/${BQSR} -o ${OUTPUT}"
+echo "$HEADER: ${CMD}" | tee -a commands.txt
+
+JOBSTEP=1
+
+scontrol update jobid=${SLURM_ARRAY_JOB_ID}_${SLURM_ARRAY_TASK_ID} name=${IDN}_Printing_${CONTIG}
+
+if ! ${CMD}; then
+	cmdFailed $?
+	exit ${JOBSTEP}${EXIT_PR}
+fi
+
+SECONDS=$(($SECONDS + $BR_SECONDS))
+JOBSTEP=""
+
+if [ "${#FILE_LIST[@]}" -lt "1" ]; then
+	# We're here from a split job.
+	rm ${INPUT} ${INPUT%.bam}.bai && echo "$HEADER: Purged input files!"
+fi
+
+touch ${OUTPUT}.done

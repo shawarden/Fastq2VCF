@@ -1,0 +1,163 @@
+#!/bin/bash
+#SBATCH --job-name		DepthOfCoverage
+#SBATCH --time			0-00:30:00
+#SBATCH --mem-per-cpu	2048
+#SBATCH --cpus-per-task	4
+#SBATCH --array			1-84
+#SBATCH --error			slurm/DC_%A_%a.out
+#SBATCH --output		slurm/DC_%A_%a.out
+
+echo "$(date) on $(hostname)"
+echo "$0 $*"
+source /resource/pipelines/Fastq2VCF/baserefs.sh
+
+function usage {
+cat << EOF
+
+*************************************
+* This script spool up an alignment *
+* run for the specified patient ID  *
+* on the DSMC cluster.              *
+*************************************
+*
+* usage: $0 options:
+*
+*********************************
+*
+* Required:
+*   -p [PLATFORM]  Capture platform/Exome chip.
+*                  List of .bed files is at /resource/bundles/Capture_Platforms
+*   -s [ID]        Sample ID string: ID
+*                  This is used to determine individuals with multiple segments.
+*                  Any four unique markers per run is sufficient.
+*
+* Optional:
+*   -h             Print help/usage information.
+*   -i [FILE]      Input file. Can be specified multiple times.
+*                  Required for initial run or Entrypoint injection.
+*   -r             Full path to reference file.
+*                  Default: /resource/bundles/human_g1k_v37/human_g1k_v37_decoy
+*
+*********************************
+EOF
+}
+
+while getopts "p:s:b:c:e:f:g:i:hmo:r:" OPTION
+do
+	case $OPTION in
+		s)
+			export SAMPLE=${OPTARG}
+			(printf "%-22s%s\n" "Sample ID" $SAMPLE 1>&2)
+			;;
+		r)
+			export REF=${OPTARG}
+			if [ ! -e $REF ]; then
+				(echo "FAIL: $REF does not exist" 1>&2)
+				exit 1
+			fi
+			export REFA=$REF.fasta
+			(printf "%-22s%s\n" "Reference sequence" $REF 1>&2)
+			;;
+		h)
+			usage
+			exit 0
+			;;
+		i)
+			if [ ! -e ${OPTARG} ]; then
+				(echo "FAIL: Input file \"$OPTARG\" does not exist!" 1>&2)
+				exit 1
+			fi
+			export FILE_LIST=(${FILE_LIST[@]} ${OPTARG})
+			(printf "%-22s%s\n" "Input file" $OPTARG 1>&2)
+			;;
+		p)
+			if [ ! -e $PLATFORMS/$OPTARG.bed ]; then
+				(echo "FAIL: Unable to located $PLATFORMS/$OPTARG.bed!" 1>&2)
+				exit 1
+			fi
+			export PLATFORM=${OPTARG}
+			(printf "%-22s%s (%s)\n" "Platform" $PLATFORM $(find $PLATFORMS/ -type f -iname "$PLATFORM.bed") 1>&2)
+			;;
+		?)
+			(echo "FAILURE: ${OPTION} ${OPTARG} is not valid!" 1>&2)
+			usage
+			exit 1
+			;;
+	esac
+done
+
+if [ "${SAMPLE}" == "" ] || [ "${PLATFORM}" == "" ]; then
+	(echo "FAIL: Missing required parameter!" 1>&2)
+	usage
+	exit 1
+fi
+
+CONTIG=${CONTIGBLOCKS[$SLURM_ARRAY_TASK_ID]}
+
+inputList=""
+
+if [ "${#FILE_LIST[@]}" -lt "1" ]; then
+	INPUT=printreads/${CONTIG}.bam
+	if ! inFile;  then exit $EXIT_IO; fi
+	inputList="-I $INPUT"
+else
+	for INPUT in ${FILE_LIST[@]}; do
+		if ! inFile; then exit $EXIT_IO; fi
+		inputList="$inputList -I $INPUT"
+	done
+fi
+
+OUTPUT=depth/${CONTIG}
+
+HEADER="DC"
+echo "$HEADER: ${inputList} + ${PLATFORM} -> ${OUTPUT}"
+
+# Make sure input and target folders exists and that output file does not!
+if ! outFile; then exit $EXIT_IO; fi
+
+platformBED=${PLATFORMS}/${PLATFORM}.bed
+  genderBED=${PLATFORMS}/$([ "$PLATFORM" == "Genomic" ] && echo -ne "AV5" || echo -ne "$PLATFORM" ).bed
+  
+# Special cases for X and Y depth of covereage as the X/YPAR1 and X/YPAR2 regions are distorted.
+# Genomic Y is rife with repeat sequences that inflate coverage so use AV5 region for that.
+# X: █▄▄▄▄▄▄▄█
+# Y: _▄▄▄▄▄▄▄_
+if [ "${CONTIG}" == "X" ]; then
+	platformFile=${genderBED}
+	actualContig=${TRUEX}
+elif [ "${CONTIG}" == "Y" ]; then
+	platformFile=${genderBED}
+	actualContig=${TRUEY}
+else
+	platformFile=${platformBED}
+	actualContig=${CONTIG}
+fi
+
+GATK_PROC=DepthOfCoverage
+GATK_ARGS="-T ${GATK_PROC} \
+-R ${REFA} \
+-L ${platformFile} \
+-L ${actualContig} \
+-isr INTERSECTION \
+--omitLocusTable \
+--omitDepthOutputAtEachBase \
+--omitIntervalStatistics \
+-nt ${SLURM_JOB_CPUS_PER_NODE}"
+
+module purge
+module load GATK
+
+CMD="srun $(which java) ${JAVA_ARGS} -jar $EBROOTGATK/GenomeAnalysisTK.jar ${GATK_ARGS} ${inputList} -o ${OUTPUT}"
+echo "$HEADER: ${CMD}" | tee -a commands.txt
+
+JOBSTEP=0
+
+scontrol update jobid=${SLURM_ARRAY_JOB_ID}_${SLURM_ARRAY_TASK_ID} name=${IDN}_Depth_${CONTIG}_$SLURM_ARRAY_TASK_ID
+
+if ! ${CMD}; then
+	cmdFailed $?
+	exit ${JOBSTEP}${EXIT_PR}
+fi
+
+
+touch ${OUTPUT}.done
