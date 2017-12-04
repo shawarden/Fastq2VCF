@@ -19,7 +19,15 @@
 
 # Update history
 
+## 2017-12-04
+
+### Changed
+- Switched from mem-per-cpu (--mem-per-cpu) to mem-per-node (--mem)
+- Gender determination alert notification contains more information.
+
+### Added
+- Automatic email detection can handle ID aliases
+
 ## 2017-11-29
 
 -Initial commit
-
