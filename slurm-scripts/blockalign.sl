@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --job-name		BlockAlign
 #SBATCH --time			359
-#SBATCH --mem-per-cpu	2048
+#SBATCH --mem			16G
 #SBATCH --cpus-per-task	8
 #SBATCH --array			0-999
 #SBATCH --error			slurm/BA_%A_%a.out

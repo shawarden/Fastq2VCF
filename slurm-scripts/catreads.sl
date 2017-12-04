@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --job-name		CatReads
 #SBATCH --time			60
-#SBATCH --mem-per-cpu	4096
+#SBATCH --mem			4G
 #SBATCH --cpus-per-task	1
 #SBATCH --error			slurm/CR_%j.out
 #SBATCH --output		slurm/CR_%j.out

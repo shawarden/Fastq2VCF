@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --job-name		MergeAndMark
 #SBATCH --time			359
-#SBATCH --mem-per-cpu	4096
+#SBATCH --mem			32G
 #SBATCH --cpus-per-task	8
 #SBATCH --array			1-84
 #SBATCH --error			slurm/MM_%A_%a.out

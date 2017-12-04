@@ -1,6 +1,6 @@
 #!/bin/bash
 #SBATCH --time			0-03:00:00
-#SBATCH --mem-per-cpu	4096
+#SBATCH --mem			32G
 #SBATCH --cpus-per-task	8
 #SBATCH --array			1-84
 #SBATCH --error			slurm/HC_%A_%a.out

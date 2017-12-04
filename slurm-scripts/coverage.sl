@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --job-name		GenderDetermination
 #SBATCH --time			0-00:10:00
-#SBATCH --mem-per-cpu	512
+#SBATCH --mem			512
 #SBATCH --cpus-per-task	1
 #SBATCH --error			slurm/GD_%j.out
 #SBATCH --output		slurm/GD_%j.out
@@ -274,7 +274,7 @@ printf "%-20s %6s\n" "#Gender:" $calculatedgender | tee -a ${OUTPUT}
 
 if [ "$GENDER" != "" ] && [ "$GENDER" != "$calculatedgender" ]; then
 	echo "#Determined gender $calculatedgender does not match specified gender $GENDER."
-	sbatch --mail-user $MAIL_USER --mail-type=FAIL --job-name="GenderMismatch_${GENDER}_${calculatedgender}" $SLSBIN/genderfail.sl
+	sbatch --mail-user $MAIL_USER --mail-type=FAIL --job-name="${SAMPLE}_ALERT_Gender_Mismatch_Specified_${GENDER}_Found_${calculatedgender}" $SLSBIN/genderfail.sl
 fi
 
 if [ "$SEXCHR" == "" ]; then
@@ -293,9 +293,9 @@ else
 	if [ "$SEXCHR" != "$sexchromosomes" ]; then
 		echo "#Determined gender chromosomes $sexchromosomes do not match specified gender chromosomes $SEXCHR."
 		echo "#Processing as $SEXCHR"
-		sbatch --mail-user $MAIL_USER --mail-type=FAIL --job-name="ChromosomalGenderMismatch_${SEXCHR}_${sexchromosomes}" $SLSBIN/genderfail.sl
-		xChromes=$(echo $SEXCHR | awk -F"x" '{print NF-1}')
-		yChromes=$(echo $SEXCHR | awk -F"y" '{print NF-1}')
+		sbatch --mail-user $MAIL_USER --mail-type=FAIL --job-name="${SAMPLE}_ALERT_Chromosomal_Gender_Mismatch_Specified_${SEXCHR}_Found_${sexchromosomes}" $SLSBIN/genderfail.sl
+		xChromes=$(echo $SEXCHR | awk -F"[xX]" '{print NF-1}')
+		yChromes=$(echo $SEXCHR | awk -F"[yY]" '{print NF-1}')
 	fi
 fi
 

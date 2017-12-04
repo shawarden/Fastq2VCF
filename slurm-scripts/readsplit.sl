@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --job-name		ReadSplit
 #SBATCH --time			359
-#SBATCH --mem-per-cpu	1024
+#SBATCH --mem			8G
 #SBATCH --cpus-per-task	8
 #SBATCH --array			1,2
 #SBATCH --error			slurm/RS_%A_%a.out

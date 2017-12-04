@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --job-name		ReadIndex
 #SBATCH --time			0-01:30:00
-#SBATCH --mem-per-cpu	4096
+#SBATCH --mem			4G
 #SBATCH --cpus-per-task	1
 #SBATCH --error			slurm/RI_%j.out
 #SBATCH --output		slurm/RI_%j.out

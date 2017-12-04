@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --job-name		FingerPrintCaller
 #SBATCH --time			0-06:00:00
-#SBATCH --mem-per-cpu	4096
+#SBATCH --mem			32G
 #SBATCH --cpus-per-task	8
 #SBATCH --error			slurm/FPH_%j.out
 #SBATCH --output		slurm/FPH_%j.out

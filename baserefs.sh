@@ -165,7 +165,7 @@ SB[MWT]=1440	# 1 day.
 # ReadSplit.
 SB[RS]="ReadSplit"
 SB[RS,MWT]=${SB[MWT]}
-SB[RS,MPC]=512
+SB[RS,MEM]=3072
 SB[RS,CPT]=6
 
 # Block alignment (Merged PA, SS & CS)
@@ -174,7 +174,7 @@ SB[SS]="Sort"
 SB[CS]="CSplit"
 SB[BA]="AlignSortSplit"
 SB[BA,MWT]=${SB[MWT]}
-SB[BA,MPC]=2048
+SB[BA,MEM]=16384
 SB[BA,CPT]=8
 
 # Merge & Mark
@@ -182,7 +182,7 @@ SB[MC]="ContigMerge"
 SB[MD]="MarkDup"
 SB[MM]="MergeMark"
 SB[MM,MWT]=${SB[MWT]}
-SB[MM,MPC]=8192
+SB[MM,MEM]=16384
 SB[MM,CPT]=2
 
 # Recal & Print
@@ -190,61 +190,61 @@ SB[BR]="BaseRecal"
 SB[PR]="PrintReads"
 SB[RC]="ReCal"
 SB[RC,MWT]=${SB[MWT]}
-SB[RC,MPC]=4092
+SB[RC,MEM]=32768
 SB[RC,CPT]=8
 
 # DepthofCoverage
 SB[DC]="DepthOfCoverage"
 SB[DC,MWT]=${SB[MWT]}
-SB[DC,MPC]=2048
+SB[DC,MEM]=16384
 SB[DC,CPT]=8
 
 # GenderDetermination
 SB[GD]="GenderDetermination"
 SB[GD,MWT]=${SB[MWT]}
-SB[GD,MPC]=512
+SB[GD,MEM]=512
 SB[GD,CPT]=1
 
 # HaplotypeCaller
 SB[HC]="HaplotypeCaller"
 SB[HC,MWT]=${SB[MWT]}
-SB[HC,MPC]=4096
+SB[HC,MEM]=32768
 SB[HC,CPT]=8
 
 # CatReads
 SB[CR]="CatReads"
 SB[CR,MWT]=${SB[MWT]}
-SB[CR,MPC]=4096
+SB[CR,MEM]=4096
 SB[CR,CPT]=1
 
 # ReadIndex
 SB[RI]="IndexReads"
 SB[RI,MWT]=${SB[MWT]}
-SB[RI,MPC]=4096
+SB[RI,MEM]=8192
 SB[RI,CPT]=2
 
 # CatVariants
 SB[CV]="CatVariants"
 SB[CV,MWT]=${SB[MWT]}
-SB[CV,MPC]=8192
+SB[CV,MEM]=16384
 SB[CV,CPT]=2
 
 # FingerPrint
 SB[FP]="FingerPrint"
 SB[FP,MWT]=${SB[MWT]}
-SB[FP,MPC]=4096
+SB[FP,MEM]=32768
 SB[FP,CPT]=8
 
 # SelectVariants
 SB[SV]="SelectVariants"
 SB[SV,MWT]=${SB[MWT]}
-SB[SV,MPC]=4096
+SB[SV,MEM]=32768
 SB[SV,CPT]=8
 
 # TransferFile
 SB[TF]="Transfer"
 SB[TF,MWT]=${SB[MWT]}
-SB[TF,MPC]=1024
+SB[TF,MEM]=6144
 SB[TF,CPT]=6
 
 export SB
@@ -677,7 +677,7 @@ function dispatch {
 	else
 		mailOut=" "
 	fi
-	echo -ne "${mailOut}--time ${SB[$JOBCAT,MWT]} --mem-per-cpu ${SB[$JOBCAT,MPC]} --cpus-per-task ${SB[$JOBCAT,CPT]}"
+	echo -ne "${mailOut}--time ${SB[$JOBCAT,MWT]} --mem ${SB[$JOBCAT,MEM]} --cpus-per-task ${SB[$JOBCAT,CPT]}"
 }
 export -f dispatch
 

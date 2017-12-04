@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --job-name		DepthOfCoverage
 #SBATCH --time			0-00:30:00
-#SBATCH --mem-per-cpu	2048
+#SBATCH --mem			8G
 #SBATCH --cpus-per-task	4
 #SBATCH --array			1-84
 #SBATCH --error			slurm/DC_%A_%a.out

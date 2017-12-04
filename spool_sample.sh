@@ -174,7 +174,19 @@ export WORK_PATH="/scratch/$USER"
 
 
 if [ "$MAIL_USER" == "" ]; then
-	if ! export MAIL_USER=$(cat /etc/slurm/userlist.txt  | grep $USER | awk -F':' '{print $3}'); then
+	oldIFS=$IFS
+	IFS=$'\n'
+	userList=($(cat /etc/slurm/userlist.txt | grep $USER))
+	for entry in ${userList[@]}; do
+		testUser=$(echo $entry | awk -F':' '{print $1}')
+		if [ "$testUser" == "$USER" ]; then
+			export MAIL_USER=$(echo $entry | awk -F':' '{print $3}')
+			break
+		fi
+	done
+	IFS=$oldIFS
+	
+	if [ "$MAIL_USER" == "" ]; then
 		(echo "FAIL: Unable to locate email address for $USER in /etc/slurm/userlist!" 1>&2)
 		exit 1
 	else

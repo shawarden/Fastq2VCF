@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --job-name		CatVariants
 #SBATCH --time			359
-#SBATCH --mem-per-cpu	16384
+#SBATCH --mem			16G
 #SBATCH --cpus-per-task	1
 #SBATCH --error			slurm/CV_%j.out
 #SBATCH --output		slurm/CV_%j.out
