@@ -110,7 +110,7 @@ else
 	READ2=blocks/R2_${BLOCK}.fastq.gz
 fi
 
-READGROUP=$($CAT_CMD $READ1 | head -1 | awk -F'[@:]' '{print $2"_"$3"_"$4"_"$5"_"$10}' )
+READGROUP=$($CAT_CMD $READ1 | head -1 | awk -F'[@:]' '{print $2"_"$3"_"$4"_"$5"_"$11}' )
 
 echo "$HEADER: $READGROUP $BLOCK $READ1 $READ2 -> $OUTPUT"
 jobStats

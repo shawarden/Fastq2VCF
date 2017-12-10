@@ -115,7 +115,7 @@ else
 	done
 fi
 
-OUTPUT=haplo/${CONTIG}.g.vcf.gz
+OUTPUT=haplo/${CONTIG}.${FINAL_TYPE}.gz
 
 if [ -e coverage.sh ]; then
 	# Gender file exists so obtain values from it.
@@ -146,10 +146,13 @@ if ! outFile; then exit $EXIT_IO; fi
 
 INPUT_BAI=${INPUT%.*}.bai
 if [ ! -e $INPUT_BAI ]; then
-	echo "WARN: $INPUT_BAI does not exist. Creating..."
+	echo "WARN: $INPUT_BAI does not exist. Indexing..."
 	module load SAMtools
 	scontrol update jobid=${SLURM_ARRAY_JOB_ID}_${SLURM_ARRAY_TASK_ID} name=${IDN}_Indexing_BAM_${CONTIG}_$SLURM_ARRAY_TASK_ID
-	samtools index $INPUT $INPUT_BAI
+	if ! samtools index $INPUT $INPUT_BAI; then
+		echo "FAIL: Unable to index $INPUT"
+		exit $EXIT_PR
+	fi
 	module purge
 fi
 
@@ -158,9 +161,11 @@ GATK_ARGS="-T ${GATK_PROC} \
 -R ${REFA} \
 -L ${CONTIG} \
 --sample_ploidy ${intervalPloidy} \
---emitRefConfidence GVCF \
 --dbsnp ${DBSNP} \
 -nct ${SLURM_JOB_CPUS_PER_NODE}"
+
+[ "$FINAL_TYPE" == "g.vcf" ] && GATK_ARGS="$GATK_ARGS --emitRefConfidence GVCF"
+[ "$FINAL_TYPE" == "vcf" ] && GATK_ARGS="$GATK_ARGS -variant_index_type LINEAR -variant_index_parameter 128000"
 
 module purge
 module load GATK

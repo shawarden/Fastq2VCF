@@ -20,14 +20,17 @@ cat << EOF
 *
 *********************************
 *
+*   -h             Print full help/usage information.
+*
 * Required:
 *   -i [FILE]      Input file. Can be specified multiple times.
 *                  Required for initial run or Entrypoint injection.
 *   -p [PLATFORM]  Capture platform/Exome chip.
-*                  List of .bed files is at /resource/bundles/Capture_Platforms
+*                  Platforms in /resource/bundles/Capture_Platforms/GRCh37: 
+$(for file in /resource/bundles/Capture_Platforms/GRCh37/*.bed; do platFile=$(basename $file); platName=${platFile%.bed}; echo "*                  $platName"; done)
 *   -s [IDLR]      Sample ID string: ID_DNAID_LIBRARY_RUN.
 *                  This is used to determine individuals with multiple segments.
-*                  Any four unique markers per run is sufficient.
+*                  If only an ID is given, multiple-runs cannot be processed.
 *
 * Optional:
 *   -b [reads]     Number of reads per split block
@@ -54,7 +57,6 @@ cat << EOF
 *   -g [Gender]    WIP
 *                  Gender: Male/Female/Unknown
 *                  Default: automatic detection.
-*   -h             Print help/usage information.
 *   -m             Set multiple runs for this sample ID.
 *                  Omit this option on final run for sample.
 *                  Final run will gather all matching IDs.
@@ -63,19 +65,22 @@ cat << EOF
 *                  Defaults to /scratch/$USER
 *   -r             Full path to reference file.
 *                  Default: /resource/bundles/human_g1k_v37/human_g1k_v37_decoy
+*   -t             Final output type: "g.vcf", "vcf". Will always end in ".gz"
+*                  Default: "g.vcf"
 *
 *********************************
 EOF
 }
 
-ENTRY_POINT=RS
+export ENTRY_POINT=RS
+export FINAL_TYPE=${FINAL_TYPE}
 
-while getopts "p:s:b:c:e:f:g:i:hmo:r:" OPTION
+while getopts "hb:c:e:f:g:i:mo:p:r:s:t:" OPTION
 do
 	case $OPTION in
-		s)
-			export SAMPLE=${OPTARG}
-			(printf "%-22s%s\n" "Sample ID" $SAMPLE 1>&2)
+		h)
+			usage
+			exit 0
 			;;
 		b)
 			if [[ "${OPTARG}" == *s ]]; then
@@ -93,7 +98,8 @@ do
 		e)
 			if [ "${SB[$OPTARG]}" == "" ]; then
 				(echo "FAIL: Invalid Entry-point" 1>&2)
-				usage
+				# Print out entry-point usage section.
+				usage | tail -n 29 | head -n 11
 				exit 1
 			fi
 			
@@ -104,15 +110,6 @@ do
 			export MAIL_USER=${OPTARG}
 			export MAIL_TYPE=FAIL,TIME_LIMIT,TIME_LIMIT_90
 			(printf "%-22s%s (%s)\n" "Email target" $MAIL_USER $MAIL_TYPE 1>&2)
-			;;
-		r)
-			export REF=${OPTARG}
-			if [ ! -e $REF ]; then
-				(echo "FAIL: $REF does not exist" 1>&2)
-				exit 1
-			fi
-			export REFA=$REF.fasta
-			(printf "%-22s%s\n" "Reference sequence" $REF 1>&2)
 			;;
 		g)
 			case ${OPTARG,,} in
@@ -128,13 +125,11 @@ do
 			esac
 			(printf "%-22s%s (%s)\n" "Gender" $GENDER "Fail on Autodetermination mismatch!" 1>&2)
 			;;
-		h)
-			usage
-			exit 0
-			;;
 		i)
 			if [ ! -e ${OPTARG} ]; then
 				(echo "FAIL: Input file $OPTARG does not exist!" 1>&2)
+				# Print out input usage section.
+				usage | tail -n 46 | head -n 2
 				exit 1
 			fi
 			export FILE_LIST=(${FILE_LIST[@]} ${OPTARG})
@@ -151,13 +146,43 @@ do
 		p)
 			if [ ! -e $PLATFORMS/$OPTARG.bed ]; then
 				(echo "FAIL: Unable to located $PLATFORMS/$OPTARG.bed!" 1>&2)
+				# Print out platform usage section.
+				usage | tail -n 44 | head -n 2
 				exit 1
 			fi
 			export PLATFORM=${OPTARG}
 			(printf "%-22s%s (%s)\n" "Platform" $PLATFORM $(find $PLATFORMS/ -type f -iname "$PLATFORM.bed") 1>&2)
 			;;
-		?)
-			(echo "FAILURE: ${OPTION} ${OPTARG} is not valid!" 1>&2)
+		r)
+			export REF=${OPTARG}
+			if [ ! -e $REF ]; then
+				(echo "FAIL: $REF does not exist" 1>&2)
+				# Print out Reference usage section 
+				usage | tail -n 6 | head -n 2
+				exit 1
+			fi
+			export REFA=$REF.fasta
+			(printf "%-22s%s\n" "Reference sequence" $REF 1>&2)
+			;;
+		s)
+			export SAMPLE=${OPTARG}
+			(printf "%-22s%s\n" "Sample ID" $SAMPLE 1>&2)
+			;;
+		t)
+			case ${OPTARG} in
+				g.vcf|vcf)
+					export FINAL_TYPE=${OPTARG}
+					(printf "%-22s%s (.gz)\n" "Final type" $FINAL_TYPE 1>&2)
+					;;
+				*)
+					(echo "FAIL: Invalid final type: ${OPTARG}." 1>&2)
+					# Print out final type usage section
+					usage | tail -n 4 | head -n 2
+					exit 1
+					;;
+			esac
+			;;
+		*)
 			usage
 			exit 1
 			;;
@@ -166,12 +191,12 @@ done
 
 if [ "${SAMPLE}" == "" ] || [ "${PLATFORM}" == "" ]; then
 	(echo "FAIL: Missing required parameter!" 1>&2)
-	usage
+	# Print out required section.
+	usage | head -n 21
 	exit 1
 fi
 
 export WORK_PATH="/scratch/$USER"
-
 
 if [ "$MAIL_USER" == "" ]; then
 	oldIFS=$IFS
@@ -187,7 +212,9 @@ if [ "$MAIL_USER" == "" ]; then
 	IFS=$oldIFS
 	
 	if [ "$MAIL_USER" == "" ]; then
-		(echo "FAIL: Unable to locate email address for $USER in /etc/slurm/userlist!" 1>&2)
+		(echo "FAIL: Unable to locate email address for $USER in /etc/slurm/userlist.txt!" 1>&2)
+		# Print out email address usage section.
+		usage | tail -n 18 | head -n 2
 		exit 1
 	else
 		export MAIL_TYPE=FAIL,TIME_LIMIT,TIME_LIMIT_90
@@ -206,12 +233,12 @@ export SAMPLE_PATH=${WORK_PATH}/${IDN}
 export RUN_PATH=${SAMPLE_PATH}/${DNA}_${LIB}_${RUN}
 
 if ! mkdir -p ${RUN_PATH}/slurm; then
-	(echo "Error creating output folder!" 1>&2)
+	(echo "FAIL: Error creating output folder!" 1>&2)
 	exit 1
 fi
 
 if ! mkdir -p ${SAMPLE_PATH}/slurm; then
-	(echo "Error creating output folder!" 1>&2)
+	(echo "FAIL: Error creating output folder!" 1>&2)
 	exit 1
 fi
 
@@ -547,7 +574,7 @@ case $ENTRY_POINT in
 			contig=${CONTIGBLOCKS[$i]}	# Does bash do array lookups every time too?
 			#printf "%04d %-22s " $i $contig
 			
-			haploOutput=haplo/${contig}.g.vcf.gz
+			haploOutput=haplo/${contig}.${FINAL_TYPE}.gz
 			
 			mkdir -p $(dirname $haploOutput)
 			
@@ -604,10 +631,10 @@ case $ENTRY_POINT in
 		haploXInput=printreads/X.bam
 		haploYInput=printreads/Y.bam
 		
-		haploXPar1Output=haplo/${XPAR1}.g.vcf.gz
-		haploTRUEXOutput=haplo/${TRUEX}.g.vcf.gz
-		haploXPar2Output=haplo/${XPAR2}.g.vcf.gz
-		    haploYOutput=haplo/Y.g.vcf.gz
+		haploXPar1Output=haplo/${XPAR1}.${FINAL_TYPE}.gz
+		haploTRUEXOutput=haplo/${TRUEX}.${FINAL_TYPE}.gz
+		haploXPar2Output=haplo/${XPAR2}.${FINAL_TYPE}.gz
+		    haploYOutput=haplo/Y.${FINAL_TYPE}.gz
 		
 		mkdir -p $(dirname ${haploXPar1Output})
 		mkdir -p $(dirname ${haploTRUEXOutput})
@@ -683,18 +710,18 @@ case $ENTRY_POINT in
 		
 		(printf "%-22s" "CatVariants" 1>&2)
 		
-		catVarOutput=${IDN}.g.vcf.gz
+		catVarOutput=${IDN}.${FINAL_TYPE}.gz
 		CatVarInputs=""
 		
 		for contig in ${CONTIGARRAY[@]}; do
 			if [ "$contig" == "MT" ] || [ "$contig" == "hs37d5" ] || [ "$contig" == "NC_007605" ]; then
 				continue	# Skip Mitochondria, hs37d5 decoys and NC_007605 decoy since we don't call them.
 			elif [ "$contig" == "X" ]; then
-				CatVarInputs=$(appendList "$CatVarInputs" "-i haplo/${XPAR1}.g.vcf.gz")
-				CatVarInputs=$(appendList "$CatVarInputs" "-i haplo/${TRUEX}.g.vcf.gz")
-				CatVarInputs=$(appendList "$CatVarInputs" "-i haplo/${XPAR2}.g.vcf.gz")
+				CatVarInputs=$(appendList "$CatVarInputs" "-i haplo/${XPAR1}.${FINAL_TYPE}.gz")
+				CatVarInputs=$(appendList "$CatVarInputs" "-i haplo/${TRUEX}.${FINAL_TYPE}.gz")
+				CatVarInputs=$(appendList "$CatVarInputs" "-i haplo/${XPAR2}.${FINAL_TYPE}.gz")
 			else
-				CatVarInputs=$(appendList "$CatVarInputs" "-i haplo/${contig}.g.vcf.gz")
+				CatVarInputs=$(appendList "$CatVarInputs" "-i haplo/${contig}.${FINAL_TYPE}.gz")
 			fi
 		done
 		

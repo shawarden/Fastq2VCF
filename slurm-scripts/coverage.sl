@@ -53,22 +53,7 @@ do
 	case $OPTION in
 		c)
 			export SEXCHR=${OPTARG}
-			(printf "%-22s%s (%s)\n" "Sex Chromosomes" $SEXCHR "Warns on Autodetermination mismatch!"1>&2)
-			;;
-		e)
-			if [ "${SB[$OPTARG]}" == "" ]; then
-				(echo "FAIL: Invalid Entry-point" 1>&2)
-				usage
-				exit 1
-			fi
-			
-			export ENTRY_POINT=${OPTARG}
-			(printf "%-22s%s (%s)\n" "Entry point" $ENTRY_POINT ${SB[$ENTRY_POINT]} 1>&2)
-			;;
-		f)
-			export MAIL_USER=${OPTARG}
-			export MAIL_TYPE=FAIL,TIME_LIMIT,TIME_LIMIT_90
-			(printf "%-22s%s (%s)\n" "Email target" $MAIL_USER $MAIL_TYPE 1>&2)
+			(printf "%-22s%s (%s)\n" "#Sex Chromosomes" $SEXCHR "Warns on Autodetermination mismatch!"1>&2)
 			;;
 		g)
 			case ${OPTARG,,} in
@@ -82,7 +67,7 @@ do
 					export GENDER="Unknown"
 					;;
 			esac
-			(printf "%-22s%s (%s)\n" "Gender" $GENDER "Fail on Autodetermination mismatch!" 1>&2)
+			(printf "%-22s%s (%s)\n" "#Gender" $GENDER "Fail on Autodetermination mismatch!" 1>&2)
 			;;
 		h)
 			usage
@@ -90,32 +75,32 @@ do
 			;;
 		i)
 			if [ ! -e ${OPTARG} ]; then
-				(echo "FAIL: Input file $OPTARG does not exist!" 1>&2)
+				(echo "#FAIL: Input file $OPTARG does not exist!" 1>&2)
 				exit 1
 			fi
 			export FILE_LIST=(${FILE_LIST[@]} ${OPTARG})
-			(printf "%-22s%s\n" "Input file" $OPTARG 1>&2)
+			(printf "%-22s%s\n" "#Input file" $OPTARG 1>&2)
 			;;
 		p)
 			if [ ! -e $PLATFORMS/$OPTARG.bed ]; then
-				echo "FAIL: Unable to located $PLATFORMS/$OPTARG.bed!"
+				echo "#FAIL: Unable to located $PLATFORMS/$OPTARG.bed!"
 				exit 1
 			fi
 			export PLATFORM=${OPTARG}
-			(printf "%-22s%s (%s)\n" "Platform" $PLATFORM $(find $PLATFORMS/ -type f -iname "$PLATFORM.bed") 1>&2)
+			(printf "%-22s%s (%s)\n" "#Platform" $PLATFORM $(find $PLATFORMS/ -type f -iname "$PLATFORM.bed") 1>&2)
 			;;
 		r)
 			export REF=${OPTARG}
 			if [ ! -e $REF ]; then
-				(echo "FAIL: $REF does not exist" 1>&2)
+				(echo "#FAIL: $REF does not exist" 1>&2)
 				exit 1
 			fi
 			export REFA=$REF.fasta
-			(printf "%-22s%s\n" "Reference sequence" $REF 1>&2)
+			(printf "%-22s%s\n" "#Reference sequence" $REF 1>&2)
 			;;
 		s)
 			export IDN=${OPTARG}
-			(printf "%-22s%s\n" "Sample ID" $SAMPLE 1>&2)
+			(printf "%-22s%s\n" "#Sample ID" $SAMPLE 1>&2)
 			;;
 		?)
 			echo "FAILURE: ${OPTION} ${OPTARG} is not valid!"
@@ -273,7 +258,7 @@ printf "%-20s %6s\n" "#SexChr:" $sexchromosomes | tee -a ${OUTPUT}
 printf "%-20s %6s\n" "#Gender:" $calculatedgender | tee -a ${OUTPUT}
 
 if [ "$GENDER" != "" ] && [ "$GENDER" != "$calculatedgender" ]; then
-	echo "#Determined gender $calculatedgender does not match specified gender $GENDER."
+	echo "#Determined gender $calculatedgender does not match specified gender $GENDER." | tee -a ${OUTPUT}
 	sbatch --mail-user $MAIL_USER --mail-type=FAIL --job-name="${SAMPLE}_ALERT_Gender_Mismatch_Specified_${GENDER}_Found_${calculatedgender}" $SLSBIN/genderfail.sl
 fi
 
@@ -291,8 +276,8 @@ if [ "$SEXCHR" == "" ]; then
 	fi
 else
 	if [ "$SEXCHR" != "$sexchromosomes" ]; then
-		echo "#Determined gender chromosomes $sexchromosomes do not match specified gender chromosomes $SEXCHR."
-		echo "#Processing as $SEXCHR"
+		echo "#Determined gender chromosomes $sexchromosomes do not match specified gender chromosomes $SEXCHR." | tee -a ${OUTPUT}
+		echo "#Processing as $SEXCHR" | tee -a ${OUTPUT}
 		sbatch --mail-user $MAIL_USER --mail-type=FAIL --job-name="${SAMPLE}_ALERT_Chromosomal_Gender_Mismatch_Specified_${SEXCHR}_Found_${sexchromosomes}" $SLSBIN/genderfail.sl
 		xChromes=$(echo $SEXCHR | awk -F"[xX]" '{print NF-1}')
 		yChromes=$(echo $SEXCHR | awk -F"[yY]" '{print NF-1}')

@@ -19,6 +19,17 @@
 
 # Update history
 
+## 2017-12-11
+
+### Added
+- Pre-Haplotyping Index attempt if .bai missing can fail correctly.
+- Platform list to usage page.
+- Final output type specification.
+
+### Changed
+- Cleaned up log output for gender determination.
+- Relevant usage output on incorrect parameter settings.
+
 ## 2017-12-04
 
 ### Changed
