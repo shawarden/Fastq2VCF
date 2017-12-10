@@ -21,6 +21,9 @@
 
 ## 2017-12-11
 
+### Fixed
+- Final out being blank!
+
 ### Added
 - Pre-Haplotyping Index attempt if .bai missing can fail correctly.
 - Platform list to usage page.

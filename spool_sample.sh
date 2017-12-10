@@ -73,7 +73,7 @@ EOF
 }
 
 export ENTRY_POINT=RS
-export FINAL_TYPE=${FINAL_TYPE}
+export FINAL_TYPE="g.vcf"
 
 while getopts "hb:c:e:f:g:i:mo:p:r:s:t:" OPTION
 do
