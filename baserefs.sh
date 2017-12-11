@@ -49,7 +49,8 @@ export       COMMON=${RESOURCES}/Hapmap3_3commonvariants.vcf
 #export          REF=${BUNDLE}/Homo_sapiens_assembly38
 
 export         REFA=${REF}.fasta
-export JOB_TEMP_DIR=$([ "${TMPDIR}" != "" ] && echo "${TMPDIR}" || echo "$SCRATCH_DIR/tmp")
+export JOB_TEMP_DIR=$SHM_DIR
+#$([ "${TMPDIR}" != "" ] && echo "${TMPDIR}" || echo "$SCRATCH_DIR/tmp")
 
 ##################################
 # Version controlled executables #

@@ -23,6 +23,7 @@
 
 ### Fixed
 - Final out being blank!
+- HaplotypeCaller output missing.
 
 ### Added
 - Pre-Haplotyping Index attempt if .bai missing can fail correctly.
