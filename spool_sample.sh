@@ -301,7 +301,7 @@ case $ENTRY_POINT in
 			fi
 			
 			# Split array contains data so run the missing split function.
-			DEP_RS=$(sbatch $(dispatch "RS") -J RS_${SAMPLE}_${readSize} -a ${splitReadArray}%6 $SLSBIN/readsplit.sl -s $SAMPLE -i ${FILE_LIST[0]} -i ${FILE_LIST[1]} -b $FASTQ_MAXREAD $MULTI_RUN -p $PLATFORM | awk '{print $4}')
+			DEP_RS=$(sbatch $(dispatch "RS") -J RS_${SAMPLE}_${readSize} -a ${splitReadArray}${ARRAYTHROTTLE} $SLSBIN/readsplit.sl -s $SAMPLE -i ${FILE_LIST[0]} -i ${FILE_LIST[1]} -b $FASTQ_MAXREAD $MULTI_RUN -p $PLATFORM | awk '{print $4}')
 			if [ $? -ne 0 ] || [ "$DEP_RS" == "" ]; then
 				(printf "FAILED!\n" 1>&2)
 				exit 1
@@ -341,7 +341,7 @@ case $ENTRY_POINT in
 		done
 		
 		if [ "$alignArray" != "" ]; then
-			DEP_BA=$(sbatch $(dispatch "BA") -J BA_${SAMPLE} --array=${alignArray}%6 $SLSBIN/blockalign.sl -s $SAMPLE $alignInput $MULTI_RUN | awk '{print $4}')
+			DEP_BA=$(sbatch $(dispatch "BA") -J BA_${SAMPLE} --array=${alignArray}${ARRAYTHROTTLE} $SLSBIN/blockalign.sl -s $SAMPLE $alignInput $MULTI_RUN | awk '{print $4}')
 			if [ $? -ne 0 ] || [ "$DEP_BA" == "" ]; then
 				(printf "FAILED!\n" 1>&2)
 				echo $ALIGNMESG
@@ -390,7 +390,7 @@ case $ENTRY_POINT in
 		
 		if [ "$mergeArray" != "" ]; then
 			#echo "CMD: sbatch $(dispatch \"MM\") -J MM_${IDN} --array $mergeArray $(depCheck $DEP_BA) $SLSBIN/mergeandmark.sl"
-			DEP_MM=$(sbatch $(dispatch "MM") -J MM_${IDN} --array ${mergeArray}%6 $(depCheck $DEP_BA) $SLSBIN/mergeandmark.sl $mergeInput | awk '{print $4}')
+			DEP_MM=$(sbatch $(dispatch "MM") -J MM_${IDN} --array ${mergeArray}${ARRAYTHROTTLE} $(depCheck $DEP_BA) $SLSBIN/mergeandmark.sl $mergeInput | awk '{print $4}')
 			if [ $? -ne 0 ] || [ "$DEP_MM" == "" ]; then
 				(printf "FAILED!\n" 1>&2)
 				exit 1
@@ -431,7 +431,7 @@ case $ENTRY_POINT in
 		done
 		
 		if [ "$recalArray" != "" ]; then
-			DEP_RC=$(sbatch $(dispatch "RC") -J RC_${IDN} --array ${recalArray}%6 $(depCheck $DEP_MM) $SLSBIN/recalibration.sl $recalInput | awk '{print $4}')
+			DEP_RC=$(sbatch $(dispatch "RC") -J RC_${IDN} --array ${recalArray}${ARRAYTHROTTLE} $(depCheck $DEP_MM) $SLSBIN/recalibration.sl $recalInput | awk '{print $4}')
 			if [ $? -ne 0 ] || [ "$DEP_RC" == "" ]; then
 				(printf "FAILED!\n" 1>&2)
 				exit 1
@@ -538,7 +538,7 @@ case $ENTRY_POINT in
 		(printf "%-22s" "Depth of Coverage" 1>&2)
 		
 		if [ "$depthArray" != "" ]; then
-			DEP_DC=$(sbatch $(dispatch "DC") -J DC_${IDN} --array ${depthArray}%6 $(depCheck $DEP_RC) $SLSBIN/depthofcoverage.sl -p $PLATFORM $depthInput | awk '{print $4}')
+			DEP_DC=$(sbatch $(dispatch "DC") -J DC_${IDN} --array ${depthArray}${ARRAYTHROTTLE} $(depCheck $DEP_RC) $SLSBIN/depthofcoverage.sl -p $PLATFORM $depthInput | awk '{print $4}')
 			if [ $? -ne 0 ] || [ "$DEP_DC" == "" ]; then
 				(printf "FAILED!\n" 1>&2)
 				exit 1
@@ -590,7 +590,7 @@ case $ENTRY_POINT in
 		(printf "%-22s" "HaplotypeCaller" 1>&2)
 		
 		if [ "$haploArray" != "" ]; then
-			DEP_HC=$(sbatch $(dispatch "HC") -J HC_${IDN} --array ${haploArray}%6 $(depCheck $DEP_RC) $SLSBIN/haplotypecaller.sl -p ${PLATFORM} $depthInput | awk '{print $4}')
+			DEP_HC=$(sbatch $(dispatch "HC") -J HC_${IDN} --array ${haploArray}${ARRAYTHROTTLE} $(depCheck $DEP_RC) $SLSBIN/haplotypecaller.sl -p ${PLATFORM} $depthInput | awk '{print $4}')
 			if [ $? -ne 0 ] || [ "$DEP_HC" == "" ]; then
 				(printf "FAILED!\n" 1>&2)
 				exit 1

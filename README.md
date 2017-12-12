@@ -19,6 +19,15 @@
 
 # Update history
 
+## 2017-12-13
+
+### Added
+- Alternate Max-Walltime for Exome captures
+- Variable array task throttle setting.
+
+### Fixed
+- Allow REF to retain previous value instead of resetting to default.
+
 ## 2017-12-11
 
 ### Fixed

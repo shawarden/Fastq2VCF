@@ -23,6 +23,7 @@ export EXIT_TF=21
 ######################
 
 export SLURM_VERSION=$(scontrol -V | awk '{print $2}')
+export ARRAYTHROTTLE="" # "%6" # Only allow 6 to run at a time.
 
 #export ENDPOINT_NESI=nesi#pan_auckland
 #export ENDPOINT_UOO=nesi#otago-dtn01
@@ -39,7 +40,7 @@ export    PLATFORMS=${RESOURCES}/bundles/Capture_Platforms/GRCh37
 export        DBSNP=${BUNDLE}/dbsnp_141.GRCh37.vcf
 export        MILLS=${BUNDLE}/Mills_and_1000G_gold_standard.indels.b37.vcf
 export       INDELS=${BUNDLE}/1000G_phase1.indels.b37.vcf
-export          REF=${BUNDLE}/human_g1k_v37_decoy
+[ -z $REF ] && export REF=${BUNDLE}/human_g1k_v37_decoy
 
 export       COMMON=${RESOURCES}/Hapmap3_3commonvariants.vcf
 #export       BUNDLE=${RESOURCES}/v0
@@ -140,7 +141,6 @@ export FASTQ_MAXZPAD=4			#${#FASTQ_MAXJOBS}	# Number of characters to pad to blo
 # 200 submissions/10minutes = 20 submissions/minute = 3 seconds/submission.
 # 600 submissions/60minutes = 10 submissions/minute = 6 seconds/submission.
 # 5000 total jobs (including all array elements.
-# Set to zero as merged align, sort and split job into one so no submission rate issue.
 export MAX_JOB_RATE=6
 
 export ENTRYPOINTS=(RS BA MM RC DC GD HC)
@@ -196,18 +196,20 @@ SB[RC,CPT]=8
 
 # DepthofCoverage
 SB[DC]="DepthOfCoverage"
+SB[DC,MWT,EXOME]=30
 SB[DC,MWT]=${SB[MWT]}
 SB[DC,MEM]=16384
 SB[DC,CPT]=8
 
 # GenderDetermination
 SB[GD]="GenderDetermination"
-SB[GD,MWT]=${SB[MWT]}
-SB[GD,MEM]=512
+SB[GD,MWT]=1
+SB[GD,MEM]=128
 SB[GD,CPT]=1
 
 # HaplotypeCaller
 SB[HC]="HaplotypeCaller"
+SB[HC,MWT,EXOME]=60
 SB[HC,MWT]=${SB[MWT]}
 SB[HC,MEM]=32768
 SB[HC,CPT]=8
@@ -226,6 +228,7 @@ SB[RI,CPT]=2
 
 # CatVariants
 SB[CV]="CatVariants"
+SB[CV,MWT,EXOME]=60
 SB[CV,MWT]=${SB[MWT]}
 SB[CV,MEM]=16384
 SB[CV,CPT]=2
@@ -678,7 +681,14 @@ function dispatch {
 	else
 		mailOut=" "
 	fi
-	echo -ne "${mailOut}--time ${SB[$JOBCAT,MWT]} --mem ${SB[$JOBCAT,MEM]} --cpus-per-task ${SB[$JOBCAT,CPT]}"
+	
+	if [ "$PLATFORM" != "Genomic" ] && [ "${SB[$JOBCAT,MWT,EXOME]}" != "" ]; then
+		wallTime="${SB[$JOBCAT,MWT,EXOME]}"
+	else
+		wallTime="${SB[$JOBCAT,MWT]}"
+	fi
+	
+	echo -ne "${mailOut} --time $wallTime --mem ${SB[$JOBCAT,MEM]} --cpus-per-task ${SB[$JOBCAT,CPT]}"
 }
 export -f dispatch
 
