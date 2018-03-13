@@ -177,7 +177,7 @@ printf "%-20s %6s %s\n" "#Fractional Y:" ${yCount} "($Ymin -> $Ymax)" | tee -a $
 xChromes=0
 yChromes=0
 
-# Count X and Y chromosomes that fall within boundries from whole numbers between 1 and 4: XXXXYYYY at most.
+# Count X and Y chromosomes that fall within boundaries from whole numbers between 1 and 4: XXXXYYYY at most.
 for i in `seq 4`
 do
 	XinRange=$(echo "$i <= $Xmax && $i >= $Xmin" | bc)
@@ -185,13 +185,13 @@ do
 	
 	if [ $XinRange -eq 1 ]
 	then
-		printf "%-20s %6s\n" "#X (in boundry):" $i | tee -a ${OUTPUT}
+		printf "%-20s %6s\n" "#X (in boundary):" $i | tee -a ${OUTPUT}
 		xChromes=$i
 	fi
 	
 	if [ $YinRange -eq 1 ]
 	then
-		printf "%-20s %6s\n" "#Y (in boundry):" $i | tee -a ${OUTPUT}
+		printf "%-20s %6s\n" "#Y (in boundary):" $i | tee -a ${OUTPUT}
 		yChromes=$i
 	fi
 done
@@ -200,38 +200,40 @@ done
 # Build chromosome string.
 if [ $xChromes -gt 0 ]
 then
-	# There are X chromosomes within the defined boundries.
+	# There are X chromosomes within the defined boundaries.
 	# Write a line of that many Xs.
 	sexchromosomes=$(for a in `seq ${xChromes}`; do echo -n X; done)
 elif [ $(echo "scale=3;$xCount > (1.0 - $XVar)" | bc) -eq 1 ]
 then
-	# There are no X chromosomes within the boundries.
+	# There are no X chromosomes within the boundaries.
 	# Frational portions of X are greater than ONE.
 	# Append these chromosomes with an E mark!
+	#echo "# WARN: No X chromosomes within boundaries but fractional X is greater than 1" | tee -a ${OUTPUT}
 	sexchromosomes=E$(for a in `seq ${xCount}`; do echo -n X; done)
 else
-	# There are no X chromosomes within the boundries.
-	# Frations of X found are below the lowest possible boundry.
+	# There are no X chromosomes within the boundaries.
+	# Frations of X found are below the lowest possible boundary.
 	# Set the number of X chromoromes to ZERO.
 	sexchromosomes="0"
 fi
 
 if [ $yChromes -gt 0 ]
 then
-	# There are Y chromosomes within the defined boundries.
+	# There are Y chromosomes within the defined boundaries.
 	# Write a line of that many Ys
 	sexchromosomes=${sexchromosomes}$(for a in `seq ${yChromes}`; do echo -n Y; done)
 elif [ $(echo "scale=3;$yCount > (1.0 - $YVar)" | bc) -eq 1 ]
 then
-	# There are no Y chromosomes within the boundries.
+	# There are no Y chromosomes within the boundaries.
 	# Fraction portions of Y are greater than ONE.
-	# Append these chromomes with an E mark.
+	# Append these chromosomes with an E mark.
+	#echo "# WARN: No Y chromosomes within boundaries but fractional Y is greater than 1" | tee -a ${OUTPUT}
 	sexchromosomes=${sexchromosomes}E$(for a in `seq ${yCount}`; do echo -n Y; done)
 elif [ $xChromes -eq 1 ]
 then
-	# There are no Y chromosomes within the boundries.
+	# There are no Y chromosomes within the boundaries.
 	# There is ONE X chromosome.
-	# Fractional portions of Y are below lowest possible boundry.
+	# Fractional portions of Y are below lowest possible boundary.
 	# Set the number of Y chromosomes to ZERO.
 	sexchromosomes=${sexchromosomes}0
 fi
@@ -245,11 +247,11 @@ else
 	# There is at least ONE X chromosome
 	if [[ $yChromes -eq 0 ]] && [[ $(echo "scale=3;$yCount < (1.0 - $YVar)" | bc) -eq 1 ]]
 	then
-		# There are no Y chromosomes within the boundries.
+		# There are no Y chromosomes within the boundaries.
 		# There are no fractional Y chromosome portions greater than the lowest possible broundry.
 		calculatedgender="Female"
 	else
-		# There are at least 1 full Y chromosome present, even if it falls outside the boundries.
+		# There are at least 1 full Y chromosome present, even if it falls outside the boundaries.
 		calculatedgender="Male"
 	fi
 fi

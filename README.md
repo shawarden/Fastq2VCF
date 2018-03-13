@@ -19,6 +19,18 @@
 
 # Update history
 
+## 2018-03-14
+
+### Changed
+- CPUs Per Task from 8 to 7 to fill Nodes.
+- printTime functions to allow usage with stdin.
+
+### Removed
+- Annotation from HaplotypeCaller as generates excessive errors in combining phase.
+
+### Fixed
+- Spelling mistakes in coverage script.
+
 ## 2017-12-13
 
 ### Added

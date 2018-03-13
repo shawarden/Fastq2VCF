@@ -176,7 +176,7 @@ SB[CS]="CSplit"
 SB[BA]="AlignSortSplit"
 SB[BA,MWT]=${SB[MWT]}
 SB[BA,MEM]=16384
-SB[BA,CPT]=8
+SB[BA,CPT]=7
 
 # Merge & Mark
 SB[MC]="ContigMerge"
@@ -192,14 +192,14 @@ SB[PR]="PrintReads"
 SB[RC]="ReCal"
 SB[RC,MWT]=${SB[MWT]}
 SB[RC,MEM]=32768
-SB[RC,CPT]=8
+SB[RC,CPT]=7
 
 # DepthofCoverage
 SB[DC]="DepthOfCoverage"
 SB[DC,MWT,EXOME]=30
 SB[DC,MWT]=${SB[MWT]}
 SB[DC,MEM]=16384
-SB[DC,CPT]=8
+SB[DC,CPT]=7
 
 # GenderDetermination
 SB[GD]="GenderDetermination"
@@ -212,7 +212,7 @@ SB[HC]="HaplotypeCaller"
 SB[HC,MWT,EXOME]=60
 SB[HC,MWT]=${SB[MWT]}
 SB[HC,MEM]=32768
-SB[HC,CPT]=8
+SB[HC,CPT]=7
 
 # CatReads
 SB[CR]="CatReads"
@@ -237,13 +237,13 @@ SB[CV,CPT]=2
 SB[FP]="FingerPrint"
 SB[FP,MWT]=${SB[MWT]}
 SB[FP,MEM]=32768
-SB[FP,CPT]=8
+SB[FP,CPT]=7
 
 # SelectVariants
 SB[SV]="SelectVariants"
 SB[SV,MWT]=${SB[MWT]}
 SB[SV,MEM]=32768
-SB[SV,CPT]=8
+SB[SV,CPT]=7
 
 # TransferFile
 SB[TF]="Transfer"
@@ -312,10 +312,7 @@ GATK_READ="-T PrintReads \
 
 GATK_HTC="-T HaplotypeCaller \
 --emitRefConfidence GVCF \
---dbsnp ${DBSNP} \
--G StandardAnnotation \
--G AS_StandardAnnotation \
--G StandardHCAnnotation"
+--dbsnp ${DBSNP}"
 
 ####################
 # Helper functions #
@@ -325,8 +322,10 @@ GATK_HTC="-T HaplotypeCaller \
 # Output HH:MM:SS format for a number of seconds.
 ###################
 function printHMS {
-	SECS=${1}
-	printf "%02d:%02d:%02d" "$(($SECS / 3600))" "$((($SECS % 3600) / 60))" "$(($SECS % 60))"
+	for i in ${*:-$(</dev/stdin)}
+	do
+		echo $i | awk '{printf "%02d:%02d:%02d\n", $1/3600, ($1%3600)/60, ($1%60)}'
+	done
 }
 export -f printHMS
 
@@ -338,7 +337,10 @@ export -f printHMS
 #      M
 ##
 function printMinutes {
-	printf "%.0f" $(echo "$(printSeconds $1) / 60" | bc -l)
+	for i in ${*:-$(</dev/stdin)}
+	do
+		printSeconds $i | awk '{printf "%.2f\n", $1/60}'
+	done
 }
 export -f printMinutes
 
@@ -350,27 +352,30 @@ export -f printMinutes
 #      M
 ##
 function printSeconds {
-	echo $1 | awk '{
-		numHMSBlocks=split($0,hmsBlocks,":")
-		
-		if (numHMSBlocks == 1) {
-			# Minutes only
-			printf "%.0f", hmsBlocks[1] * 60
-		} else if (numHMSBlocks == 2) {
-			# Minutes:Seconds
-			printf "%.0f", (hmsBlocks[1] * 60) + hmsBlocks[2]
-		} else if (numHMSBlocks == 3) {
-			# (days?)-Hours:Minutes:Seconds
-			numDHBlocks=split(hmsBlocks[1],dhBlocks,"-")
-			if (numDHBlocks == 1) {
-				# Hours only.
-				printf "%.0f", (dhBlocks[1] * 60 * 60) + (hmsBlocks[2] * 60) + hmsBlocks[3]
-			} else {
-				# Days-Hours.
-				printf "%.0f", (dhBlocks[1] * 24 * 60 * 60) + (dhBlocks[2] * 60 * 60) + (hmsBlocks[2] * 60) + hmsBlocks[3]
+	for i in ${*:-$(</dev/stdin)}
+	do
+		echo $i | awk '{
+			numHMSBlocks=split($0,hmsBlocks,":")
+			
+			if (numHMSBlocks == 1) {
+				# Minutes only
+				printf "%.0f", hmsBlocks[1] * 60
+			} else if (numHMSBlocks == 2) {
+				# Minutes:Seconds
+				printf "%.0f", (hmsBlocks[1] * 60) + hmsBlocks[2]
+			} else if (numHMSBlocks == 3) {
+				# (days?)-Hours:Minutes:Seconds
+				numDHBlocks=split(hmsBlocks[1],dhBlocks,"-")
+				if (numDHBlocks == 1) {
+					# Hours only.
+					printf "%.0f", (dhBlocks[1] * 60 * 60) + (hmsBlocks[2] * 60) + hmsBlocks[3]
+				} else {
+					# Days-Hours.
+					printf "%.0f\n", (dhBlocks[1] * 24 * 60 * 60) + (dhBlocks[2] * 60 * 60) + (hmsBlocks[2] * 60) + hmsBlocks[3]
+				}
 			}
-		}
-	}'
+		}'
+	done
 }
 export -f printSeconds
 
