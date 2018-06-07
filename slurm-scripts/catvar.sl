@@ -8,6 +8,14 @@
 
 echo "$(date) on $(hostname)"
 
+if [ -e $EXEDIR/baserefs.sh ]
+then
+	source $EXEDIR/baserefs.sh
+else
+	(echo "WARN: Eecuting without baserefs.sh" 1>&2)
+fi
+
+
 function usage {
 cat << EOF
 
@@ -69,8 +77,6 @@ if [ "${#FILE_LIST[@]}" -lt "1" ] || [ "${OUTPUT}" == "" ]; then
 	usage
 	exit 1
 fi
-
-source /resource/pipelines/Fastq2VCF/baserefs.sh
 
 IDN=$(echo $SLURM_JOB_NAME | cut -d'_' -f2)
 

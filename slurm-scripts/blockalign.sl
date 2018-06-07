@@ -11,7 +11,12 @@ echo "$(date) on $(hostname)"
 
 export RAMDISK=2
 
-source /resource/pipelines/Fastq2VCF/baserefs.sh
+if [ -e $EXEDIR/baserefs.sh ]
+then
+	source $EXEDIR/baserefs.sh
+else
+	(echo "WARN: Eecuting without baserefs.sh" 1>&2)
+fi
 
 function usage {
 cat << EOF

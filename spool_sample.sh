@@ -5,11 +5,12 @@
 #############################################################
 
 # Get base values
-source /resource/pipelines/Fastq2VCF/baserefs.sh
+export EXEDIR=$(dirname $0)
+
+source $EXEDIR/baserefs.sh
 
 function usage {
-cat << EOF
-
+echo -e "\
 *************************************
 * This script spool up an alignment *
 * run for the specified patient ID  *
@@ -25,24 +26,23 @@ cat << EOF
 * Required:
 *   -i [FILE]      Input file. Can be specified multiple times.
 *                  Required for initial run or Entrypoint injection.
-*   -p [PLATFORM]  Capture platform/Exome chip.
-*                  Platforms in /resource/bundles/Capture_Platforms/GRCh37: 
-$(for file in /resource/bundles/Capture_Platforms/GRCh37/*.bed; do platFile=$(basename $file); platName=${platFile%.bed}; echo "*                  $platName"; done)
 *   -s [IDLR]      Sample ID string: ID_DNAID_LIBRARY_RUN.
 *                  This is used to determine individuals with multiple segments.
 *                  If only an ID is given, multiple-runs cannot be processed.
+*   -p [PLATFORM]  Capture platform/Exome chip.
+*                  Platforms in /resource/bundles/Capture_Platforms/GRCh37: 
+$(for file in /resource/bundles/Capture_Platforms/GRCh37/*.bed; do platFile=$(basename $file); platName=${platFile%.bed}; [ -e "${file%.*}.sh" ] && echo "*                  $platName"; done)
 *
 * Optional:
-*   -b [reads]     Number of reads per split block
+*   \033[1;33m-b [reads]     WIP\033[0m
+*                  Number of reads per split block
 *                  Default 90000000 (90M)
 *                  appending 's' will attempt to split reads into that many
 *                  blocks of roughly equal size.
-*   -c [Xs&Ys]     WIP
-*                  Force HaplotypeCaller on X & Y with specified ploidy.
+*   -c [Xs&Ys]     Force HaplotypeCaller on X & Y with specified ploidy.
 *                  Entered as XY combination: XX, XY, XXY, XYY, XXYY, etc.
 *                  Default: Automatic detection.
-*   -e [step]      WIP
-*                  Entry point for script. Inputs must conform to entry point.
+*   -e [step]      Entry point for script. Inputs must conform to entry point.
 *                  RS: Split Reads (default) (Input: 2x .fastq[.gz])
 *                  BA: Alignment, Sort & Split to Contigs (Input: 2x .fastq[.gz])
 *                  MM: Merge Contig & Markduplicates (Input: 1x .bam)
@@ -54,26 +54,23 @@ $(for file in /resource/bundles/Capture_Platforms/GRCh37/*.bed; do platFile=$(ba
 *                  Default: RS
 *   -f [email]     Email address to alert on job failures to address other than
 *                  address listed in /etc/slurm/userlist.
-*   -g [Gender]    WIP
+*   \033[1;33m-g [Gender]    WIP\033[0m
 *                  Gender: Male/Female/Unknown
 *                  Default: automatic detection.
 *   -m             Set multiple runs for this sample ID.
 *                  Omit this option on final run for sample.
 *                  Final run will gather all matching IDs.
-*   -o             WIP
+*   \033[0;31m-o             WIP (not working)\033[0m
 *                  Path to final output location.
-*                  Defaults to /scratch/$USER
+*                  Defaults to /scratch/\$SCRATCH (/scratch/$USER)
 *   -r             Full path to reference file.
 *                  Default: /resource/bundles/human_g1k_v37/human_g1k_v37_decoy
-*   -t             Final output type: "g.vcf", "vcf". Will always end in ".gz"
-*                  Default: "g.vcf"
+*   -t             Final output type: g.vcf, vcf. Will always end in .gz
+*                  Default: g.vcf
 *
-*********************************
-EOF
+*********************************\
+"
 }
-
-export ENTRY_POINT=RS
-export FINAL_TYPE="g.vcf"
 
 while getopts "hb:c:e:f:g:i:mo:p:r:s:t:" OPTION
 do
@@ -99,7 +96,7 @@ do
 			if [ "${SB[$OPTARG]}" == "" ]; then
 				(echo "FAIL: Invalid Entry-point" 1>&2)
 				# Print out entry-point usage section.
-				usage | tail -n 29 | head -n 11
+				usage | head -n 42 | tail -n 11
 				exit 1
 			fi
 			
@@ -108,7 +105,6 @@ do
 			;;
 		f)
 			export MAIL_USER=${OPTARG}
-			export MAIL_TYPE=FAIL,TIME_LIMIT,TIME_LIMIT_90
 			(printf "%-22s%s (%s)\n" "Email target" $MAIL_USER $MAIL_TYPE 1>&2)
 			;;
 		g)
@@ -129,7 +125,7 @@ do
 			if [ ! -e ${OPTARG} ]; then
 				(echo "FAIL: Input file $OPTARG does not exist!" 1>&2)
 				# Print out input usage section.
-				usage | tail -n 46 | head -n 2
+				usage | head -n 15 | tail -n 2
 				exit 1
 			fi
 			export FILE_LIST=(${FILE_LIST[@]} ${OPTARG})
@@ -147,7 +143,7 @@ do
 			if [ ! -e $PLATFORMS/$OPTARG.bed ]; then
 				(echo "FAIL: Unable to located $PLATFORMS/$OPTARG.bed!" 1>&2)
 				# Print out platform usage section.
-				usage | tail -n 44 | head -n 2
+				usage | head -n 31 | tail -n 13
 				exit 1
 			fi
 			export PLATFORM=${OPTARG}
@@ -158,7 +154,7 @@ do
 			if [ ! -e $REF ]; then
 				(echo "FAIL: $REF does not exist" 1>&2)
 				# Print out Reference usage section 
-				usage | tail -n 6 | head -n 2
+				usage | head -n 55 | tail -n 2
 				exit 1
 			fi
 			export REFA=$REF.fasta
@@ -189,10 +185,13 @@ do
 	esac
 done
 
+[ "$FINAL_TYPE" == "" ] && export FINAL_TYPE="g.vcf"
+[ "$ENTRY_POINT" == "" ] && export ENTRY_POINT=RS
+
 if [ "${SAMPLE}" == "" ] || [ "${PLATFORM}" == "" ]; then
 	(echo "FAIL: Missing required parameter!" 1>&2)
 	# Print out required section.
-	usage | head -n 21
+	usage # | head -n 20
 	exit 1
 fi
 
@@ -273,26 +272,29 @@ case $ENTRY_POINT in
 		############################
 		
 		if [ "$splitReadArray" != "" ]; then
-			
-			if [ ! -e ${FILE_LIST[0]} ] || [ ! -e ${FILE_LIST[1]} ]
+			if echo $splitReadArray | grep 1 1>/dev/null;
 			then
-				(echo "Read files may not exist!" 1>&2)
-				exit 1
+				if [ ! -e ${FILE_LIST[0]} ]
+				then
+					echo "FAIL Read 1 ${FILE_LIST[0]} file does not exist!"
+					exit 1
+				fi
+				read1Size=$(ls -lah ${FILE_LIST[0]} | awk '{print $5}')
+			else
+				read1Size=0
 			fi
 			
-			####################
-			# Get a fancy size #
-			####################
-			
-			sizeString=" kMGTEPYZ"
-			sizeBlock=0
-			readSize=$(($(ls -la ${FILE_LIST[0]} | awk '{print $5}') + $(ls -la ${FILE_LIST[1]} | awk '{print $5}')))
-			while [ $(echo "$readSize / 1024 > 0" | bc) -eq 1 ]; do
-				#printf "%-12s %.0f%s\n" "Read size" $readSize $(echo ${sizeString:${sizeBlock}:1}Bytes | sed -e 's/ //g')
-				readSize=$(echo "$readSize / 1024" | bc -l)
-				sizeBlock=$((sizeBlock+1))
-			done
-			readSize=$(echo $(printf "%.0f" $readSize)${sizeString:${sizeBlock}:1}B | sed -e 's/ //g')
+			if echo $splitReadArray | grep 2 1>/dev/null;
+			then
+				if [ ! -e ${FILE_LIST[1]} ]
+				then
+					echo "FAIL Read 1 ${FILE_LIST[1]} file does not exist!"
+					exit 1
+				fi
+				read2Size=$(ls -lah ${FILE_LIST[1]} | awk '{print $5}')
+			else
+				read2Size=0
+			fi
 			
 			if [ "$SMART_READS" != "" ]; then
 				# Split reads into SMART_READS number of blocks.
@@ -301,7 +303,7 @@ case $ENTRY_POINT in
 			fi
 			
 			# Split array contains data so run the missing split function.
-			DEP_RS=$(sbatch $(dispatch "RS") -J RS_${SAMPLE}_${readSize} -a ${splitReadArray}${ARRAYTHROTTLE} $SLSBIN/readsplit.sl -s $SAMPLE -i ${FILE_LIST[0]} -i ${FILE_LIST[1]} -b $FASTQ_MAXREAD $MULTI_RUN -p $PLATFORM | awk '{print $4}')
+			DEP_RS=$(sbatch $(dispatch "RS") -J RS_${SAMPLE}_${read1Size}_${read2Size} -a ${splitReadArray}${ARRAYTHROTTLE} $SLSBIN/readsplit.sl -s $SAMPLE -i ${FILE_LIST[0]} -i ${FILE_LIST[1]} -b $FASTQ_MAXREAD $MULTI_RUN -p $PLATFORM | awk '{print $4}')
 			if [ $? -ne 0 ] || [ "$DEP_RS" == "" ]; then
 				(printf "FAILED!\n" 1>&2)
 				exit 1

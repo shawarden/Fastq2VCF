@@ -9,7 +9,13 @@
 
 echo "$(date) on $(hostname)"
 
-source /resource/pipelines/Fastq2VCF/baserefs.sh
+if [ -e $EXEDIR/baserefs.sh ]
+then
+	source $EXEDIR/baserefs.sh
+else
+	(echo "WARN: Eecuting without baserefs.sh" 1>&2)
+fi
+
 
 function usage {
 cat << EOF
@@ -301,7 +307,7 @@ if [ ! -e ${SAMPLE}_R${PAIRNUM}_split.done ]; then
 	echo "Paired read not completed!"
 else
 	echo "Paired read done!"
-	if ! ${PBIN}/spool_sample.sh -e BA -s $SAMPLE -p $PLATFORM $MULTI_RUN ; then
+	if ! ${PBIN}/spool_sample.sh -e BA -s $SAMPLE -p $PLATFORM $MULTI_RUN -t $FINAL_TYPE; then
 		cmdFailed $?
 		exit $EXIT_PR
 	fi

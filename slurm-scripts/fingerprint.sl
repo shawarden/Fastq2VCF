@@ -8,7 +8,13 @@
 
 echo "$(date) on $(hostname)"
 
-source /resource/pipelines/Fastq2VCF/baserefs.sh
+if [ -e $EXEDIR/baserefs.sh ]
+then
+	source $EXEDIR/baserefs.sh
+else
+	(echo "WARN: Eecuting without baserefs.sh" 1>&2)
+fi
+
 
 IDN=${1}
 INPUT=${2}

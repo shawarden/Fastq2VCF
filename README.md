@@ -19,6 +19,20 @@
 
 # Update history
 
+## 2018-06-08
+
+### Fixed
+- Final output type (-t) not being respected.
+
+### Changed
+- MaxWallTime value set appropriately.
+- Baseref source from absolute to relative pathing.
+- Increased default usage output.
+
+### Added
+- Requeue to email list since it results in a failure overall.
+- Added mechanism for localized, per user settings via $HOME/fq2vcf.sh file
+
 ## 2018-03-14
 
 ### Changed

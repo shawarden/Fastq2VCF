@@ -145,6 +145,12 @@ export MAX_JOB_RATE=6
 
 export ENTRYPOINTS=(RS BA MM RC DC GD HC)
 
+###############
+# EMAIL TYPES #
+###############
+
+export MAIL_TYPE=FAIL,TIME_LIMIT,TIME_LIMIT_90,REQUEUE
+
 ##########################
 # Dispatch function data #
 ##########################
@@ -165,7 +171,7 @@ SB[MWT]=1440	# 1 day.
 
 # ReadSplit.
 SB[RS]="ReadSplit"
-SB[RS,MWT]=${SB[MWT]}
+SB[RS,MWT]=180
 SB[RS,MEM]=3072
 SB[RS,CPT]=6
 
@@ -174,7 +180,7 @@ SB[PA]="Align"
 SB[SS]="Sort"
 SB[CS]="CSplit"
 SB[BA]="AlignSortSplit"
-SB[BA,MWT]=${SB[MWT]}
+SB[BA,MWT]=360
 SB[BA,MEM]=16384
 SB[BA,CPT]=7
 
@@ -182,7 +188,7 @@ SB[BA,CPT]=7
 SB[MC]="ContigMerge"
 SB[MD]="MarkDup"
 SB[MM]="MergeMark"
-SB[MM,MWT]=${SB[MWT]}
+SB[MM,MWT]=450
 SB[MM,MEM]=16384
 SB[MM,CPT]=2
 
@@ -190,14 +196,14 @@ SB[MM,CPT]=2
 SB[BR]="BaseRecal"
 SB[PR]="PrintReads"
 SB[RC]="ReCal"
-SB[RC,MWT]=${SB[MWT]}
+SB[RC,MWT]=666
 SB[RC,MEM]=32768
 SB[RC,CPT]=7
 
 # DepthofCoverage
 SB[DC]="DepthOfCoverage"
 SB[DC,MWT,EXOME]=30
-SB[DC,MWT]=${SB[MWT]}
+SB[DC,MWT]=60
 SB[DC,MEM]=16384
 SB[DC,CPT]=7
 
@@ -210,26 +216,26 @@ SB[GD,CPT]=1
 # HaplotypeCaller
 SB[HC]="HaplotypeCaller"
 SB[HC,MWT,EXOME]=60
-SB[HC,MWT]=${SB[MWT]}
+SB[HC,MWT]=180
 SB[HC,MEM]=32768
 SB[HC,CPT]=7
 
 # CatReads
 SB[CR]="CatReads"
-SB[CR,MWT]=${SB[MWT]}
+SB[CR,MWT]=120
 SB[CR,MEM]=4096
 SB[CR,CPT]=1
 
 # ReadIndex
 SB[RI]="IndexReads"
-SB[RI,MWT]=${SB[MWT]}
+SB[RI,MWT]=480
 SB[RI,MEM]=8192
 SB[RI,CPT]=2
 
 # CatVariants
 SB[CV]="CatVariants"
 SB[CV,MWT,EXOME]=60
-SB[CV,MWT]=${SB[MWT]}
+SB[CV,MWT]=240
 SB[CV,MEM]=16384
 SB[CV,CPT]=2
 
@@ -805,3 +811,5 @@ function realpath {
 	echo $(cd $(dirname $1); pwd)/$(basename $1);
 }
 export -f realpath
+
+[ -e $HOME/fq2vcf.sh ] && source $HOME/fq2vcf.sh

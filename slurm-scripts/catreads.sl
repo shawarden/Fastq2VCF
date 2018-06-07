@@ -8,7 +8,12 @@
 
 echo "$(date) on $(hostname)"
 
-source /resource/pipelines/Fastq2VCF/baserefs.sh
+if [ -e $EXEDIR/baserefs.sh ]
+then
+	source $EXEDIR/baserefs.sh
+else
+	(echo "WARN: Eecuting without baserefs.sh" 1>&2)
+fi
 
 function usage {
 cat << EOF
@@ -112,7 +117,7 @@ echo "$HEADER: ${CMD}" | tee -a commands.txt
 
 JOBSTEP=0
 
-scontrol update jobid=$SLURM_JOD_ID name=${IDN}_ConcatReads
+scontrol update jobid=${SLURM_JOB_ID} name=${IDN}_ConcatReads
 
 if ! ${CMD}; then
 	cmdFailed $?
