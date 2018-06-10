@@ -9,15 +9,6 @@
 # Merge exit codes from piped commands so any command that fails carries to $?
 set -o pipefail
 
-##############
-# Exit codes #
-##############
-
-export EXIT_IO=12
-export EXIT_PR=15
-export EXIT_MV=20
-export EXIT_TF=21
-
 ######################
 # General References #
 ######################
@@ -61,63 +52,14 @@ export   ZIP_CMD=/usr/bin/pigz
 export   CAT_CMD="${ZIP_CMD} -cd"
 export SPLIT_CMD=/usr/bin/split
 
-######################
-# Contig shinanigans #
-######################
+##############
+# Exit codes #
+##############
 
-# Setup basic contig definition.
-export REFD=${REF}.dict
-
-if [ ! -e $REFD ]; then 
-	echo "Unable to locate reference dictionary"
-	exit 1
-fi
-
-# List of contigs in specified reference sequence.
-# GRCh37 has 84
-# HG38 has 3367
-export CONTIGARRAY=("" $(cat $REFD | awk 'NR!=1{print $2}' | sed -e 's/SN://g'))
-
-# List of contigs in specified reference sequence, excluding those marked as decoy, non-human sequences.
-# GRCh37 has 84
-# HG38 has 982 (2384 decoys removed)
-export CONTIGARRAY_NODECOY=("" $(cat $REFD | grep -v "decoy" | awk 'NR!=1{print $2}' | sed -e 's/SN://g'))
-
-# List of primary contigs to wrap all alternate and positionless contigs within a chromosome.
-# In HG38 chr1 will be combination of chr1, chr1_KI270706v1_random, chr1_KI270762v1_alt, etc...
-# In HG38 HLA will contain all HLA contigs.
-# In HG38 EBV will contain all Epstein-Barr Virus contigs
-# GRCh37 has 84
-# HG38 has 28
-export CONTIGBLOCKS=("" $(for i in $(seq 0 $((${#CONTIGARRAY[@]}-1))); do echo "${CONTIGARRAY[$i]}"; done | awk -F'[* ]' '
-{
-	words[$1]++
-}
-END{
-	for (w in words) {
-		printf "%s\n", w
-	}
-}
-	' | sort -V -f
-))
-
-export         NUMCONTIGS=$((${#CONTIGARRAY[@]} - 1))
-export NUMCONTIGS_NODECOY=$((${#CONTIGARRAY_NODECOY[@]} - 1))
-export   NUMCONTIG_BLOCKS=$((${#CONTIGBLOCKS[@]} - 1))
-
-# Gender contigs have parts that are not created equal.
-export XPAR1="X:1-2699520"
-export TRUEX="X:2699521-154931043"
-export XPAR2="X:154931044-155260560"
-export TRUEY="Y:2649521-59034050"
-
-#export YPAR1="chrY:10000-2781479"		# Hard masked to Ns in HG38
-#export YPAR2="chrY:56887902-57217415"
-#export TRUEY="chrY:2781480-56887901"	# Hard masked to Ns in HG38
-
-#export XPAR1="chrX:10000-2781479"
-#export XPAR2="chrX:155701382-156030895"
-#export TRUEX="chrX:2781480-155701381"
+export EXIT_IO=12
+export EXIT_PR=15
+export EXIT_MV=20
+export EXIT_TF=21
 
 ####################
 # Modules versions #
@@ -143,21 +85,29 @@ export FASTQ_MAXZPAD=4			#${#FASTQ_MAXJOBS}	# Number of characters to pad to blo
 # 5000 total jobs (including all array elements.
 export MAX_JOB_RATE=6
 
+#######################
+# Entry point options #
+#######################
+
 export ENTRYPOINTS=(RS BA MM RC DC GD HC)
 
 ###############
 # EMAIL TYPES #
 ###############
 
+# SLURM email notification types: NONE, BEGIN, END, FAIL, REQUEUE, ALL (BEGIN,
+#  END, FAIL, REQUEUE, and STAGE_OUT), STAGE_OUT, TIME_LIMIT, TIME_LIMIT_90,
+#  TIME_LIMIT_80, TIME_LIMIT_50, ARRAY_TASKS (send emails for each array task)
 export MAIL_TYPE=FAIL,TIME_LIMIT,TIME_LIMIT_90,REQUEUE
 
-##########################
-# Dispatch function data #
-##########################
+##############################
+# Job dispatch function data #
+##############################
 declare -A SB
 
-# MWT: Calibrated Max Wall-Time
-# MPC: Memory per Cores
+# MWT: Calibrated Max Wall-Time in minutes.
+# MWT,EXOME: Calibrated Max Wall-Time in minutes for exomic data.
+# MEM: Memory allocation in megabytes
 # CPT: Cores per Task
 
 # Calculating base and per contig walltimes.
@@ -258,6 +208,71 @@ SB[TF,MEM]=6144
 SB[TF,CPT]=6
 
 export SB
+
+######################
+# Contig shinanigans #
+######################
+
+# Gender contigs have parts that are not created equal.
+export XPAR1="X:1-2699520"
+export TRUEX="X:2699521-154931043"
+export XPAR2="X:154931044-155260560"
+export TRUEY="Y:2649521-59034050"
+
+#export YPAR1="chrY:10000-2781479"		# Hard masked to Ns in HG38
+#export YPAR2="chrY:56887902-57217415"
+#export TRUEY="chrY:2781480-56887901"	# Hard masked to Ns in HG38
+
+#export XPAR1="chrX:10000-2781479"
+#export XPAR2="chrX:155701382-156030895"
+#export TRUEX="chrX:2781480-155701381"
+
+# Call Per-user settings if they exist.
+[ -e $HOME/fq2vcf.sh ] && source $HOME/fq2vcf.sh
+
+################################################
+# Function determinated data sets. DO NOT EDIT #
+################################################
+
+# Setup basic contig definition.
+export REFD=${REF}.dict
+
+if [ ! -e $REFD ]; then 
+	echo "Unable to locate reference dictionary"
+	exit 1
+fi
+
+# List of contigs in specified reference sequence.
+# GRCh37 has 84
+# HG38 has 3367
+export CONTIGARRAY=("" $(cat $REFD | awk 'NR!=1{print $2}' | sed -e 's/SN://g'))
+
+# List of contigs in specified reference sequence, excluding those marked as decoy, non-human sequences.
+# GRCh37 has 84
+# HG38 has 982 (2384 decoys removed)
+export CONTIGARRAY_NODECOY=("" $(cat $REFD | grep -v "decoy" | awk 'NR!=1{print $2}' | sed -e 's/SN://g'))
+
+# List of primary contigs to wrap all alternate and positionless contigs within a chromosome.
+# In HG38 chr1 will be combination of chr1, chr1_KI270706v1_random, chr1_KI270762v1_alt, etc...
+# In HG38 HLA will contain all HLA contigs.
+# In HG38 EBV will contain all Epstein-Barr Virus contigs
+# GRCh37 has 84
+# HG38 has 28
+export CONTIGBLOCKS=("" $(for i in $(seq 0 $((${#CONTIGARRAY[@]}-1))); do echo "${CONTIGARRAY[$i]}"; done | awk -F'[* ]' '
+{
+	words[$1]++
+}
+END{
+	for (w in words) {
+		printf "%s\n", w
+	}
+}
+	' | sort -V -f
+))
+
+export         NUMCONTIGS=$((${#CONTIGARRAY[@]} - 1))
+export NUMCONTIGS_NODECOY=$((${#CONTIGARRAY_NODECOY[@]} - 1))
+export   NUMCONTIG_BLOCKS=$((${#CONTIGBLOCKS[@]} - 1))
 
 ###########################
 # Java memory calculation #
@@ -811,5 +826,3 @@ function realpath {
 	echo $(cd $(dirname $1); pwd)/$(basename $1);
 }
 export -f realpath
-
-[ -e $HOME/fq2vcf.sh ] && source $HOME/fq2vcf.sh

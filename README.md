@@ -19,6 +19,11 @@
 
 # Update history
 
+## 2018-06-11
+
+### Changed
+- Rearranged baserefs for better per user config.
+
 ## 2018-06-08
 
 ### Fixed
