@@ -107,12 +107,14 @@ mkdir -p $(dirname ${OUTPUT})
 
 export HEADER="BA"
 
-if [ "${#FILE_LIST[@]}" -gt 0 ]; then
+if [ "${#FILE_LIST[@]}" -eq 2 ]; then
 	READ1=${FILE_LIST[0]}
 	READ2=${FILE_LIST[1]}
+elif [ "${#FILE_LIST[@]}" -eq 1 ]; then
+	READ1=${FILE_LIST[0]}
 else
 	READ1=blocks/R1_${BLOCK}.fastq.gz
-	READ2=blocks/R2_${BLOCK}.fastq.gz
+	[ -e blocks/R2_${BLOCK}.fastq.gz ] && READ2=blocks/R2_${BLOCK}.fastq.gz
 fi
 
 READGROUP=$($CAT_CMD $READ1 | head -1 | awk -F'[@:]' '{print $2"_"$3"_"$4"_"$5"_"$11}' )
