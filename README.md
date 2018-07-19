@@ -30,6 +30,9 @@
 ### Added
 - Exclude version folders from tarball
 
+### Fixed
+- Reference dictionary location. 
+
 ## 2018-06-11
 
 ### Changed

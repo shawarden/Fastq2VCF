@@ -255,7 +255,7 @@ export ENTRYPOINTS=(RS BA MM RC DC GD HC)
 export REFD=${REF}.dict
 
 if [ ! -e $REFD ]; then 
-	echo "Unable to locate reference dictionary"
+	echo "Unable to locate reference dictionary: $REFD"
 	exit 1
 fi
 
