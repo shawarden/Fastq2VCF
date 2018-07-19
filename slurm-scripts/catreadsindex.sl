@@ -1,10 +1,10 @@
 #!/bin/bash
-#SBATCH --job-name		ReadIndex
-#SBATCH --time			0-01:30:00
-#SBATCH --mem			4G
+#SBATCH --job-name	ReadIndex
+#SBATCH --time		0-01:30:00
+#SBATCH --mem		4G
 #SBATCH --cpus-per-task	1
-#SBATCH --error			slurm/RI_%j.out
-#SBATCH --output		slurm/RI_%j.out
+#SBATCH --error		slurm/RI_%j.out
+#SBATCH --output	slurm/RI_%j.out
 
 echo "$(date) on $(hostname)"
 
@@ -12,7 +12,7 @@ if [ -e $EXEDIR/baserefs.sh ]
 then
 	source $EXEDIR/baserefs.sh
 else
-	(echo "WARN: Eecuting without baserefs.sh" 1>&2)
+	(echo "WARN: Executing without baserefs.sh" 1>&2)
 fi
 
 

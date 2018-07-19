@@ -13,7 +13,6 @@ set -o pipefail
 # General References #
 ######################
 
-export SLURM_VERSION=$(scontrol -V | awk '{print $2}')
 export ARRAYTHROTTLE="" # "%6" # Only allow 6 to run at a time.
 
 #export ENDPOINT_NESI=nesi#pan_auckland
@@ -21,7 +20,7 @@ export ARRAYTHROTTLE="" # "%6" # Only allow 6 to run at a time.
 
 export    RESOURCES=/resource
 export          BIN=FAIL
-export         PBIN=/resource/pipelines/Fastq2VCF
+export         PBIN=$(dirname $0)
 export       SLSBIN=${PBIN}/slurm-scripts
 export DESCRIPTIONS=${RESOURCES}/FastQdescriptions.txt
 
@@ -44,6 +43,21 @@ export         REFA=${REF}.fasta
 export JOB_TEMP_DIR=$SHM_DIR
 #$([ "${TMPDIR}" != "" ] && echo "${TMPDIR}" || echo "$SCRATCH_DIR/tmp")
 
+if [ ! -d $SCRATCH ]
+then
+	if [ -d /scratch/$USER ]
+	then
+		export SCRATCH=/scratch/$USER
+	elif [ -d /scratch/jobs/$USER ]
+	then
+		export SCRATCH=/scratch/jobs/$USER
+	else
+		(echo "FAIL: Unable to locate scratch area!" 1>&2)
+		exit 1
+	fi
+fi
+
+
 ##################################
 # Version controlled executables #
 ##################################
@@ -51,15 +65,6 @@ export JOB_TEMP_DIR=$SHM_DIR
 export   ZIP_CMD=/usr/bin/pigz
 export   CAT_CMD="${ZIP_CMD} -cd"
 export SPLIT_CMD=/usr/bin/split
-
-##############
-# Exit codes #
-##############
-
-export EXIT_IO=12
-export EXIT_PR=15
-export EXIT_MV=20
-export EXIT_TF=21
 
 ####################
 # Modules versions #
@@ -84,12 +89,6 @@ export FASTQ_MAXZPAD=4			#${#FASTQ_MAXJOBS}	# Number of characters to pad to blo
 # 600 submissions/60minutes = 10 submissions/minute = 6 seconds/submission.
 # 5000 total jobs (including all array elements.
 export MAX_JOB_RATE=6
-
-#######################
-# Entry point options #
-#######################
-
-export ENTRYPOINTS=(RS BA MM RC DC GD HC)
 
 ###############
 # EMAIL TYPES #
@@ -229,6 +228,23 @@ export TRUEY="Y:2649521-59034050"
 
 # Call Per-user settings if they exist.
 [ -e $HOME/fq2vcf.sh ] && source $HOME/fq2vcf.sh
+
+export SLURM_VERSION=$(scontrol -V | awk '{print $2}')
+
+##############
+# Exit codes #
+##############
+
+export EXIT_IO=12
+export EXIT_PR=15
+export EXIT_MV=20
+export EXIT_TF=21
+
+#######################
+# Entry point options #
+#######################
+
+export ENTRYPOINTS=(RS BA MM RC DC GD HC)
 
 ################################################
 # Function determinated data sets. DO NOT EDIT #

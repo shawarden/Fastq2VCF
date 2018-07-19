@@ -30,8 +30,8 @@ echo -e "\
 *                  This is used to determine individuals with multiple segments.
 *                  If only an ID is given, multiple-runs cannot be processed.
 *   -p [PLATFORM]  Capture platform/Exome chip.
-*                  Platforms in /resource/bundles/Capture_Platforms/GRCh37: 
-$(for file in /resource/bundles/Capture_Platforms/GRCh37/*.bed; do platFile=$(basename $file); platName=${platFile%.bed}; [ -e "${file%.*}.sh" ] && echo "*                  $platName"; done)
+*                  Platforms in \$PLATFORMS: ${PLATFORMS}/
+$(for file in ${PLATFORMS}/*.bed; do platFile=$(basename $file); platName=${platFile%.bed}; [ -e "${file%.*}.sh" ] && echo "*                  $platName"; done)
 *
 * Optional:
 *   \033[1;33m-b [reads]     WIP\033[0m
@@ -64,7 +64,7 @@ $(for file in /resource/bundles/Capture_Platforms/GRCh37/*.bed; do platFile=$(ba
 *                  Path to final output location.
 *                  Defaults to /scratch/\$SCRATCH (/scratch/$USER)
 *   -r             Full path to reference file.
-*                  Default: /resource/bundles/human_g1k_v37/human_g1k_v37_decoy
+*                  Default: $REF
 *   -t             Final output type: g.vcf, vcf. Will always end in .gz
 *                  Default: g.vcf
 *
@@ -198,20 +198,23 @@ fi
 export WORK_PATH="/scratch/$USER"
 
 if [ "$MAIL_USER" == "" ]; then
-	oldIFS=$IFS
-	IFS=$'\n'
-	userList=($(cat /etc/slurm/userlist.txt | grep $USER))
-	for entry in ${userList[@]}; do
-		testUser=$(echo $entry | awk -F':' '{print $1}')
-		if [ "$testUser" == "$USER" ]; then
-			export MAIL_USER=$(echo $entry | awk -F':' '{print $3}')
-			break
-		fi
-	done
-	IFS=$oldIFS
+	if [ -e /etc/slurm/userlist.txt ]
+	then
+		oldIFS=$IFS
+		IFS=$'\n'
+		userList=($(cat /etc/slurm/userlist.txt | grep $USER))
+		for entry in ${userList[@]}; do
+			testUser=$(echo $entry | awk -F':' '{print $1}')
+			if [ "$testUser" == "$USER" ]; then
+				export MAIL_USER=$(echo $entry | awk -F':' '{print $3}')
+				break
+			fi
+		done
+		IFS=$oldIFS
+	fi
 	
 	if [ "$MAIL_USER" == "" ]; then
-		(echo "FAIL: Unable to locate email address for $USER in /etc/slurm/userlist.txt!" 1>&2)
+		(echo "FAIL: Unable to locate email address for $USER or /etc/slurm/userlist.txt does not exist!" 1>&2)
 		# Print out email address usage section.
 		usage | tail -n 18 | head -n 2
 		exit 1

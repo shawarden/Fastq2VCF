@@ -1,10 +1,10 @@
 #!/bin/bash
-#SBATCH --job-name		GenderDetermination
-#SBATCH --time			0-00:10:00
-#SBATCH --mem			512
+#SBATCH --job-name	GenderDetermination
+#SBATCH --time		0-00:10:00
+#SBATCH --mem		512
 #SBATCH --cpus-per-task	1
-#SBATCH --error			slurm/GD_%j.out
-#SBATCH --output		slurm/GD_%j.out
+#SBATCH --error		slurm/GD_%j.out
+#SBATCH --output	slurm/GD_%j.out
 
 echo "$(date) on $(hostname)"
 
@@ -12,7 +12,7 @@ if [ -e $EXEDIR/baserefs.sh ]
 then
 	source $EXEDIR/baserefs.sh
 else
-	(echo "WARN: Eecuting without baserefs.sh" 1>&2)
+	(echo "WARN: Executing without baserefs.sh" 1>&2)
 fi
 
 

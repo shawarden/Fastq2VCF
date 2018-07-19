@@ -1,11 +1,11 @@
 #!/bin/bash
-#SBATCH --job-name		Recalibration
-#SBATCH --time			359
-#SBATCH --mem			32G
+#SBATCH --job-name	Recalibration
+#SBATCH --time		359
+#SBATCH --mem		32G
 #SBATCH --cpus-per-task	8
-#SBATCH --array			1-84
-#SBATCH --error			slurm/RC_%A_%a.out
-#SBATCH --output		slurm/RC_%A_%a.out
+#SBATCH --array		1-84
+#SBATCH --error		slurm/RC_%A_%a.out
+#SBATCH --output	slurm/RC_%A_%a.out
 
 echo "$(date) on $(hostname)"
 
@@ -13,7 +13,7 @@ if [ -e $EXEDIR/baserefs.sh ]
 then
 	source $EXEDIR/baserefs.sh
 else
-	(echo "WARN: Eecuting without baserefs.sh" 1>&2)
+	(echo "WARN: Executing without baserefs.sh" 1>&2)
 fi
 
 function usage {

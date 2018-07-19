@@ -1,10 +1,10 @@
 #!/bin/bash
-#SBATCH --job-name		FingerPrintCaller
-#SBATCH --time			0-06:00:00
-#SBATCH --mem			32G
+#SBATCH --job-name	FingerPrintCaller
+#SBATCH --time		0-06:00:00
+#SBATCH --mem		32G
 #SBATCH --cpus-per-task	8
-#SBATCH --error			slurm/FPH_%j.out
-#SBATCH --output		slurm/FPH_%j.out
+#SBATCH --error		slurm/FPH_%j.out
+#SBATCH --output	slurm/FPH_%j.out
 
 echo "$(date) on $(hostname)"
 
@@ -12,7 +12,7 @@ if [ -e $EXEDIR/baserefs.sh ]
 then
 	source $EXEDIR/baserefs.sh
 else
-	(echo "WARN: Eecuting without baserefs.sh" 1>&2)
+	(echo "WARN: Executing without baserefs.sh" 1>&2)
 fi
 
 

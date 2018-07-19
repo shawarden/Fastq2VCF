@@ -1,11 +1,11 @@
 #!/bin/bash
-#SBATCH --job-name		BlockAlign
-#SBATCH --time			359
-#SBATCH --mem			16G
+#SBATCH --job-name	BlockAlign
+#SBATCH --time		359
+#SBATCH --mem		16G
 #SBATCH --cpus-per-task	8
-#SBATCH --array			0-999
-#SBATCH --error			slurm/BA_%A_%a.out
-#SBATCH --output		slurm/BA_%A_%a.out
+#SBATCH --array		0-999
+#SBATCH --error		slurm/BA_%A_%a.out
+#SBATCH --output	slurm/BA_%A_%a.out
 
 echo "$(date) on $(hostname)"
 
@@ -15,7 +15,7 @@ if [ -e $EXEDIR/baserefs.sh ]
 then
 	source $EXEDIR/baserefs.sh
 else
-	(echo "WARN: Eecuting without baserefs.sh" 1>&2)
+	(echo "WARN: Executing without baserefs.sh" 1>&2)
 fi
 
 function usage {

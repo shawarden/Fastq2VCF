@@ -1,10 +1,10 @@
 #!/bin/bash
-#SBATCH --job-name		CatVariants
-#SBATCH --time			359
-#SBATCH --mem			16G
+#SBATCH --job-name	CatVariants
+#SBATCH --time		359
+#SBATCH --mem		16G
 #SBATCH --cpus-per-task	1
-#SBATCH --error			slurm/CV_%j.out
-#SBATCH --output		slurm/CV_%j.out
+#SBATCH --error		slurm/CV_%j.out
+#SBATCH --output	slurm/CV_%j.out
 
 echo "$(date) on $(hostname)"
 
@@ -12,7 +12,7 @@ if [ -e $EXEDIR/baserefs.sh ]
 then
 	source $EXEDIR/baserefs.sh
 else
-	(echo "WARN: Eecuting without baserefs.sh" 1>&2)
+	(echo "WARN: Executing without baserefs.sh" 1>&2)
 fi
 
 

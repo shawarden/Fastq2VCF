@@ -1,11 +1,11 @@
 #!/bin/bash
-#SBATCH --job-name		DepthOfCoverage
-#SBATCH --time			0-00:30:00
-#SBATCH --mem			8G
+#SBATCH --job-name	DepthOfCoverage
+#SBATCH --time		0-00:30:00
+#SBATCH --mem		8G
 #SBATCH --cpus-per-task	4
-#SBATCH --array			1-84
-#SBATCH --error			slurm/DC_%A_%a.out
-#SBATCH --output		slurm/DC_%A_%a.out
+#SBATCH --array		1-84
+#SBATCH --error		slurm/DC_%A_%a.out
+#SBATCH --output	slurm/DC_%A_%a.out
 
 echo "$(date) on $(hostname)"
 echo "$0 $*"
@@ -14,7 +14,7 @@ if [ -e $EXEDIR/baserefs.sh ]
 then
 	source $EXEDIR/baserefs.sh
 else
-	(echo "WARN: Eecuting without baserefs.sh" 1>&2)
+	(echo "WARN: Executing without baserefs.sh" 1>&2)
 fi
 
 
