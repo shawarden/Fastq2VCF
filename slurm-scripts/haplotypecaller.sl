@@ -19,8 +19,7 @@ fi
 
 
 function usage {
-cat << EOF
-
+echo -e "\
 *************************************
 * This script spool up an alignment *
 * run for the specified patient ID  *
@@ -32,22 +31,21 @@ cat << EOF
 *********************************
 *
 * Required:
-*   -s [ID]        Sample ID string: ID.
+*   -s [IDLR]      Sample ID string: ID_DNAID_LIBRARY_RUN.
 *                  This is used to determine individuals with multiple segments.
-*                  Any four unique markers per run is sufficient.
+*                  If only an ID is given, multiple-runs cannot be processed.
 *
 * Optional:
 *   -c [contig]    Run under specified contig.
 *   -i [FILE]      Input file. Can be specified multiple times.
 *                  Required for initial run or Entrypoint injection.
 *   -p [PLATFORM]  Capture platform/Exome chip.
-*                  List of .bed files is at /resource/bundles/Capture_Platforms
+*                  List of .bed files is at \$PLATFORMS: ${PLATFORMS}
 *   -h             Print help/usage information.
 *   -r             Full path to reference file.
-*                  Default: /resource/bundles/human_g1k_v37/human_g1k_v37_decoy
+*                  Default: \$REF_CORE ($REF_CORE)
 *
-*********************************
-EOF
+*********************************"
 }
 
 ENTRY_POINT=RS

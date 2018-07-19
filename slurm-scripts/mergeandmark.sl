@@ -18,8 +18,7 @@ fi
 
 
 function usage {
-cat << EOF
-
+echo -e "\
 *************************************
 * This script will merge BAM files  *
 * and mark duplicate entries        *
@@ -32,18 +31,17 @@ cat << EOF
 * Required:
 *   -s [IDLR]      Sample ID string: ID_DNAID_LIBRARY_RUN.
 *                  This is used to determine individuals with multiple segments.
-*                  Any four unique markers per run is sufficient.
+*                  If only an ID is given, multiple-runs cannot be processed.
 *
 * Optional:
 *   -i [FILE]      Input file. Specify twice for pair end reads.
 *                  If this option is not present files will be sought from
-*                  $(pwd)/split/...
-*   -o             WIP
+*                  \$(pwd)/split/ ($(pwd)/split/)
+*   ${bred}-o             WIP${nrm}
 *                  Path to final output location.
-*                  Defaults to /scratch/$USER
+*                  Defaults to /scratch/\$USER (/scratch/$USER)
 *
-*********************************
-EOF
+*********************************"
 }
 
 while getopts "s:i:r:o:" OPTION

@@ -30,7 +30,8 @@ export    PLATFORMS=${RESOURCES}/bundles/Capture_Platforms/GRCh37
 export        DBSNP=${BUNDLE}/dbsnp_141.GRCh37.vcf
 export        MILLS=${BUNDLE}/Mills_and_1000G_gold_standard.indels.b37.vcf
 export       INDELS=${BUNDLE}/1000G_phase1.indels.b37.vcf
-[ -z $REF ] && export REF=${BUNDLE}/human_g1k_v37_decoy
+export     REF_CORE=${BUNDLE}/human_g1k_v37_decoy
+[ -z $REF ] && export REF=$REF_CORE
 
 export       COMMON=${RESOURCES}/Hapmap3_3commonvariants.vcf
 #export       BUNDLE=${RESOURCES}/v0
@@ -842,3 +843,34 @@ function realpath {
 	echo $(cd $(dirname $1); pwd)/$(basename $1);
 }
 export -f realpath
+
+# check if stdout is a terminal...
+if test -t 1; then
+
+    # see if it supports colors...
+    ncolors=$(tput colors)
+
+    if test -n "$ncolors" && test $ncolors -ge 8; then
+        bld="$(tput bold)"
+        und="$(tput smul)"
+        std="$(tput smso)"
+        nrm="$(tput sgr0)"
+        blk="$(tput setaf 0)"
+        red="$(tput setaf 1)"
+        grn="$(tput setaf 2)"
+        ylw="$(tput setaf 3)"
+        blu="$(tput setaf 4)"
+        mag="$(tput setaf 5)"
+        cyn="$(tput setaf 6)"
+        wht="$(tput setaf 7)"
+        gry="$(tput setaf 8)"
+        bred="$(tput setaf 9)"
+        bgrn="$(tput setaf 10)"
+        bylw="$(tput setaf 11)"
+        bblu="$(tput setaf 12)"
+        bmag="$(tput setaf 13)"
+        bcyn="$(tput setaf 14)"
+        bwht="$(tput setaf 15)"
+    fi
+fi
+

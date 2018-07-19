@@ -18,8 +18,7 @@ fi
 
 
 function usage {
-cat << EOF
-
+echo -e "\
 *************************************
 * This script will align FastQ files*
 * Sorts them and splits by Contig   *
@@ -32,15 +31,21 @@ cat << EOF
 * Required:
 *   -i [FILE]      Input file.
 *   -s [IDLR]      Sample ID string: ID_DNAID_LIBRARY_RUN.
+*                  This is used to determine individuals with multiple segments.
+*                  If only an ID is given, multiple-runs cannot be processed.
 *
 * Options:
-*   -b [reads]     Number of reads per split block.
-*                  Default: 90000000 (90M)
-*   -m             Marks as on of multiple-runs.
+*   ${ylw}-b [reads]     WIP${nrm}
+*                  Number of reads per split block
+*                  Default: \$FASTQ_MAXREAD ($FASTQ_MAXREAD)
+*   -m             Set this sample as one of many for individual.
+*                  Halts after contig split
+*                  Omit for final sample for individual.
+*                  ${ylw}Do not perform multiple runs simultaneously as final run will${nrm}
+*                  ${ylw}merge all partial samples for individual.${nrm}
 *   -p [PLATFORM]  Capture platform/Exome chip.
-*                  List of .bed files is at /resource/bundles/Capture_Platforms
-*********************************
-EOF
+*                  List of .bed files is at \$PLATFORMS: ${PLATFORMS}/
+*********************************"
 }
 
 while getopts "i:s:d:b:mo:p:" OPTION

@@ -17,8 +17,7 @@ else
 fi
 
 function usage {
-cat << EOF
-
+echo -e "\
 *************************************
 * This script spool up an alignment *
 * run for the specified patient ID  *
@@ -37,10 +36,9 @@ cat << EOF
 *                  Path to final output location.
 *                  Defaults to /scratch/$USER
 *   -r             Full path to reference file.
-*                  Default: /resource/bundles/human_g1k_v37/human_g1k_v37_decoy
+*                  Default: \$REF_CORE ($REF_CORE)
 *
-*********************************
-EOF
+*********************************"
 }
 
 while getopts "hi:o:r:" OPTION

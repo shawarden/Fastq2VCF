@@ -19,6 +19,17 @@
 
 # Update history
 
+## 2018-07-20
+
+### Changed
+- baserefs export order to suit external per usercfg file settings
+- script tarball named after script folder.
+- script folder now automatically determined via dirname
+- Tidied up usage output.
+
+### Added
+- Exclude version folders from tarball
+
 ## 2018-06-11
 
 ### Changed

@@ -34,14 +34,14 @@ echo -e "\
 $(for file in ${PLATFORMS}/*.bed; do platFile=$(basename $file); platName=${platFile%.bed}; [ -e "${file%.*}.sh" ] && echo "*                  $platName"; done)
 *
 * Optional:
-*   \033[1;33m-b [reads]     WIP\033[0m
+*   ${ylw}-b [reads]     WIP${nrm}
 *                  Number of reads per split block
-*                  Default 90000000 (90M)
+*                  Default: \$FASTQ_MAXREAD ($FASTQ_MAXREAD)
 *                  appending 's' will attempt to split reads into that many
 *                  blocks of roughly equal size.
 *   -c [Xs&Ys]     Force HaplotypeCaller on X & Y with specified ploidy.
 *                  Entered as XY combination: XX, XY, XXY, XYY, XXYY, etc.
-*                  Default: Automatic detection.
+*                  Default: Automatic
 *   -e [step]      Entry point for script. Inputs must conform to entry point.
 *                  RS: Split Reads (default) (Input: 2x .fastq[.gz])
 *                  BA: Alignment, Sort & Split to Contigs (Input: 2x .fastq[.gz])
@@ -54,22 +54,24 @@ $(for file in ${PLATFORMS}/*.bed; do platFile=$(basename $file); platName=${plat
 *                  Default: RS
 *   -f [email]     Email address to alert on job failures to address other than
 *                  address listed in /etc/slurm/userlist.
-*   \033[1;33m-g [Gender]    WIP\033[0m
+*                  ${ylw}Required if address list is unavailable.${nrm}
+*   ${ylw}-g [Gender]    WIP${nrm}
 *                  Gender: Male/Female/Unknown
-*                  Default: automatic detection.
-*   -m             Set multiple runs for this sample ID.
-*                  Omit this option on final run for sample.
-*                  Final run will gather all matching IDs.
-*   \033[0;31m-o             WIP (not working)\033[0m
+*                  Default: Automatic
+*   -m             Set this sample as one of many for individual.
+*                  Halts after contig split
+*                  Omit for final sample for individual.
+*                  ${ylw}Do not perform multiple runs simultaneously as final run will${nrm}
+*                  ${ylw}merge all partial samples for individual.${nrm}
+*   ${bred}-o             WIP (not working)${nrm}
 *                  Path to final output location.
-*                  Defaults to /scratch/\$SCRATCH (/scratch/$USER)
+*                  Default: /scratch/\$SCRATCH (/scratch/$USER)
 *   -r             Full path to reference file.
-*                  Default: $REF
+*                  Default: \$REF_CORE ($REF_CORE)
 *   -t             Final output type: g.vcf, vcf. Will always end in .gz
 *                  Default: g.vcf
 *
-*********************************\
-"
+*********************************"
 }
 
 while getopts "hb:c:e:f:g:i:mo:p:r:s:t:" OPTION

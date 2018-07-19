@@ -19,8 +19,7 @@ else
 fi
 
 function usage {
-cat << EOF
-
+echo -e "\
 *************************************
 * This script will align FastQ files*
 * Sorts them and splits by Contig   *
@@ -33,23 +32,24 @@ cat << EOF
 * Required:
 *   -s [IDLR]      Sample ID string: ID_DNAID_LIBRARY_RUN.
 *                  This is used to determine individuals with multiple segments.
-*                  Any four unique markers per run is sufficient.
+*                  If only an ID is given, multiple-runs cannot be processed.
 *
 * Optional:
 *   -i [FILE]      Input file. Specify twice for pair end reads.
 *                  If this option is not present files will be sought from
-*                  $(pwd)/blocks/...
-*   -m             Set multiple runs for this sample ID.
-*                  Omit this option on final run for sample.
-*                  Final run will gather all matching IDs.
+*                  \$(pwd)/blocks/ ($(pwd)/blocks/)
+*   -m             Set this sample as one of many for individual.
+*                  Halts after contig split
+*                  Omit for final sample for individual.
+*                  ${ylw}Do not perform multiple runs simultaneously as final run will${nrm}
+*                  ${ylw}merge all partial samples for individual.${nrm}
 *   -r             Full path to reference file.
 *                  Default: /resource/bundles/human_g1k_v37/human_g1k_v37_decoy
-*   -o             WIP
+*   ${bred}-o             WIP${nrm}
 *                  Path to final output location.
-*                  Defaults to /scratch/$USER
+*                  Defaults to /scratch/\$USER (/scratch/$USER)
 *
-*********************************
-EOF
+*********************************"
 }
 
 while getopts "s:i:r:o:m" OPTION

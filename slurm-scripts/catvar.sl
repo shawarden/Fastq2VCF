@@ -17,8 +17,7 @@ fi
 
 
 function usage {
-cat << EOF
-
+echo -e "\
 ****************************************
 * This script will concatonate multple *
 * VCF files into a single VCF file     *
@@ -33,10 +32,9 @@ cat << EOF
 *   -o [file]      Output file.
 * Optional:
 *   -r             Full path to reference file.
-*                  Default: /resource/bundles/human_g1k_v37/human_g1k_v37_decoy
+*                  Default: \$REF_CORE ($REF_CORE)
 *
-*********************************
-EOF
+*********************************"
 }
 
 while getopts "i:r:o:" OPTION
