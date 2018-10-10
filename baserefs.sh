@@ -20,7 +20,7 @@ export ARRAYTHROTTLE="" # "%6" # Only allow 6 to run at a time.
 
 export    RESOURCES=/resource
 export          BIN=FAIL
-export         PBIN=$(dirname $0)
+export         PBIN=${EXEDIR}
 export       SLSBIN=${PBIN}/slurm-scripts
 export DESCRIPTIONS=${RESOURCES}/FastQdescriptions.txt
 
@@ -78,7 +78,7 @@ export MOD_JAVA="Java"
 # FastQ Split Data management #
 ###############################
 
-export FASTQ_MAXREAD=90000000	# How many reads per block.
+export FASTQ_MAXREAD=40000000	# How many reads per block.
 export FASTQ_MAXSCAN=10000		# How many lines to check for best index.
 export FASTQ_MAXDIFF=2			# Maximum index variation before new index is created.
 export FASTQ_MAXJOBS=100		# Maximum number of alignment & sort array elements.
@@ -132,7 +132,7 @@ SB[CS]="CSplit"
 SB[BA]="AlignSortSplit"
 SB[BA,MWT]=360
 SB[BA,MEM]=16384
-SB[BA,CPT]=7
+SB[BA,CPT]=8
 
 # Merge & Mark
 SB[MC]="ContigMerge"
@@ -148,14 +148,14 @@ SB[PR]="PrintReads"
 SB[RC]="ReCal"
 SB[RC,MWT]=666
 SB[RC,MEM]=32768
-SB[RC,CPT]=7
+SB[RC,CPT]=8
 
 # DepthofCoverage
 SB[DC]="DepthOfCoverage"
 SB[DC,MWT,EXOME]=30
 SB[DC,MWT]=60
 SB[DC,MEM]=16384
-SB[DC,CPT]=7
+SB[DC,CPT]=8
 
 # GenderDetermination
 SB[GD]="GenderDetermination"
@@ -168,7 +168,7 @@ SB[HC]="HaplotypeCaller"
 SB[HC,MWT,EXOME]=60
 SB[HC,MWT]=180
 SB[HC,MEM]=32768
-SB[HC,CPT]=7
+SB[HC,CPT]=8
 
 # CatReads
 SB[CR]="CatReads"
@@ -193,19 +193,19 @@ SB[CV,CPT]=2
 SB[FP]="FingerPrint"
 SB[FP,MWT]=${SB[MWT]}
 SB[FP,MEM]=32768
-SB[FP,CPT]=7
+SB[FP,CPT]=8
 
 # SelectVariants
 SB[SV]="SelectVariants"
 SB[SV,MWT]=${SB[MWT]}
 SB[SV,MEM]=32768
-SB[SV,CPT]=7
+SB[SV,CPT]=8
 
 # TransferFile
 SB[TF]="Transfer"
 SB[TF,MWT]=${SB[MWT]}
 SB[TF,MEM]=6144
-SB[TF,CPT]=6
+SB[TF,CPT]=2
 
 export SB
 

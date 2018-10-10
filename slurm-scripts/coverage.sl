@@ -33,7 +33,7 @@ echo -e "\
 *                  List of .bed files is at \$PLATFORMS ($PLATFORMS)
 *
 * Optional:
-*   ${ylw}-c [Xs&Ys]     WIP${nrm}
+*   ${ylw}-c [STRING]    WIP${nrm}
 *                  Force HaplotypeCaller on X & Y with specified ploidy.
 *                  Entered as XY combination: XX, XY, XXY, XYY, XXYY, etc.
 *                  Default: Automatic detection.
@@ -43,7 +43,7 @@ echo -e "\
 *   -h             Print help/usage information.
 *   -i [FILE]      Input file. Can be specified multiple times.
 *                  Required for initial run or Entrypoint injection.
-*   -r             Full path to reference file.
+*   -r [FILE]      Full path to reference file.
 *                  Default: \$REF_CORE ($REF_CORE)
 *   -s [IDLR]      Sample ID string: ID_DNAID_LIBRARY_RUN.
 *                  This is used to determine individuals with multiple segments.
@@ -81,6 +81,11 @@ do
 		i)
 			if [ ! -e ${OPTARG} ]; then
 				(echo "#FAIL: Input file $OPTARG does not exist!" 1>&2)
+				exit 1
+			fi
+			if [[ " ${FILE_LIST[@]} " =~ " ${OPTARG} " ]]
+			then
+				(echo "FAIL: Input file $OPTARG already added. Perhaps you want Read 2?" 1>&2)
 				exit 1
 			fi
 			export FILE_LIST=(${FILE_LIST[@]} ${OPTARG})

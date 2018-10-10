@@ -32,10 +32,10 @@ echo -e "\
 *   -h             Print help/usage information.
 *   -i [FILE]      Input file.
 *                  If no input specified will search in ${pwd}/markdup/${CONTIG}.bam
-*   -o             WIP
+*   ${bred}-o [PATH]      WIP${nrm}
 *                  Path to final output location.
 *                  Defaults to /scratch/$USER
-*   -r             Full path to reference file.
+*   -r [FILE]      Full path to reference file.
 *                  Default: \$REF_CORE ($REF_CORE)
 *
 *********************************"
@@ -51,6 +51,11 @@ do
 		i)
 			if [ ! -e ${OPTARG} ]; then
 				(echo "FAIL: Input file $OPTARG does not exist!" 1>&2)
+				exit 1
+			fi
+			if [[ " ${FILE_LIST[@]} " =~ " ${OPTARG} " ]]
+			then
+				(echo "FAIL: Input file $OPTARG already added. Perhaps you want Read 2?" 1>&2)
 				exit 1
 			fi
 			export FILE_LIST=(${FILE_LIST[@]} ${OPTARG})

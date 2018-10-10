@@ -28,10 +28,10 @@ echo -e "\
 *********************************
 *
 * Required:
-*   -i [file]      Input file. Can be specified multiple times.
-*   -o [file]      Output file.
+*   -i [FILE]      Input file. Can be specified multiple times.
+*   -o [FILE]      Output file.
 * Optional:
-*   -r             Full path to reference file.
+*   -r [FILE]      Full path to reference file.
 *                  Default: \$REF_CORE ($REF_CORE)
 *
 *********************************"
@@ -44,6 +44,11 @@ do
 		i)
 			if [ ! -e ${OPTARG} ]; then
 				echo "FAIL: Input file $OPTARG does not exist!"
+				exit 1
+			fi
+			if [[ " ${FILE_LIST[@]} " =~ " ${OPTARG} " ]]
+			then
+				(echo "FAIL: Input file $OPTARG already added. Perhaps you want Read 2?" 1>&2)
 				exit 1
 			fi
 			export FILE_LIST=(${FILE_LIST[@]} ${OPTARG})

@@ -37,7 +37,7 @@ echo -e "\
 *   -i [FILE]      Input file. Specify twice for pair end reads.
 *                  If this option is not present files will be sought from
 *                  \$(pwd)/split/ ($(pwd)/split/)
-*   ${bred}-o             WIP${nrm}
+*   ${bred}-o [PATH]      WIP${nrm}
 *                  Path to final output location.
 *                  Defaults to /scratch/\$USER (/scratch/$USER)
 *
@@ -55,6 +55,11 @@ do
 		i)
 			if [ ! -e ${OPTARG} ]; then
 				(echo "FAIL: Input file $OPTARG does not exist!" 1>&2)
+				exit 1
+			fi
+			if [[ " ${FILE_LIST[@]} " =~ " ${OPTARG} " ]]
+			then
+				(echo "FAIL: Input file $OPTARG already added. Perhaps you want Read 2?" 1>&2)
 				exit 1
 			fi
 			FILE_LIST=(${FILE_LIST[@]} ${OPTARG})

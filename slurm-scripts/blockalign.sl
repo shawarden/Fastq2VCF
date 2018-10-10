@@ -43,9 +43,9 @@ echo -e "\
 *                  Omit for final sample for individual.
 *                  ${ylw}Do not perform multiple runs simultaneously as final run will${nrm}
 *                  ${ylw}merge all partial samples for individual.${nrm}
-*   -r             Full path to reference file.
+*   -r [FILE]      Full path to reference file.
 *                  Default: /resource/bundles/human_g1k_v37/human_g1k_v37_decoy
-*   ${bred}-o             WIP${nrm}
+*   ${bred}-o [PATH]      WIP${nrm}
 *                  Path to final output location.
 *                  Defaults to /scratch/\$USER (/scratch/$USER)
 *
@@ -67,6 +67,11 @@ do
 		i)
 			if [ ! -e ${OPTARG} ]; then
 				(echo "FAIL: Input file $OPTARG does not exist!" 1>&2)
+				exit 1
+			fi
+			if [[ " ${FILE_LIST[@]} " =~ " ${OPTARG} " ]]
+			then
+				(echo "FAIL: Input file $OPTARG already added. Perhaps you want Read 2?" 1>&2)
 				exit 1
 			fi
 			FILE_LIST=(${FILE_LIST[@]} ${OPTARG})

@@ -35,7 +35,7 @@ echo -e "\
 *                  If only an ID is given, multiple-runs cannot be processed.
 *
 * Options:
-*   ${ylw}-b [reads]     WIP${nrm}
+*   ${ylw}-b [NUM]       WIP${nrm}
 *                  Number of reads per split block
 *                  Default: \$FASTQ_MAXREAD ($FASTQ_MAXREAD)
 *   -m             Set this sample as one of many for individual.
@@ -55,6 +55,11 @@ do
 		i)
 			if [ ! -e ${OPTARG} ]; then
 				echo "FAIL: Input file $OPTARG does not exist!"
+				exit 1
+			fi
+			if [[ " ${FILE_LIST[@]} " =~ " ${OPTARG} " ]]
+			then
+				(echo "FAIL: Input file $OPTARG already added. Perhaps you want Read 2?" 1>&2)
 				exit 1
 			fi
 			export FILE_LIST=(${FILE_LIST[@]} ${OPTARG})

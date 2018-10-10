@@ -19,6 +19,18 @@
 
 # Update history
 
+## 2018-10-10
+
+### Changed
+
+- Increased core use per contig from 7 to 8 as to not choke the cluster.
+- Decreased FASTQ_MAXREAD to 40m to decrease chunk size, increasing number of chunks, decreasing time to complete each chunk.
+- converted catreadindex script to bash argument format.
+
+### Fixed
+
+- Specifying the same input file throws an error.
+
 ## 2018-07-20
 
 ### Changed

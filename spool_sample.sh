@@ -34,15 +34,15 @@ echo -e "\
 $(for file in ${PLATFORMS}/*.bed; do platFile=$(basename $file); platName=${platFile%.bed}; [ -e "${file%.*}.sh" ] && echo "*                  $platName"; done)
 *
 * Optional:
-*   ${ylw}-b [reads]     WIP${nrm}
+*   ${ylw}-b [NUM]        WIP${nrm}
 *                  Number of reads per split block
 *                  Default: \$FASTQ_MAXREAD ($FASTQ_MAXREAD)
 *                  appending 's' will attempt to split reads into that many
 *                  blocks of roughly equal size.
-*   -c [Xs&Ys]     Force HaplotypeCaller on X & Y with specified ploidy.
+*   -c [STRING]    Force HaplotypeCaller on X & Y with specified ploidy.
 *                  Entered as XY combination: XX, XY, XXY, XYY, XXYY, etc.
 *                  Default: Automatic
-*   -e [step]      Entry point for script. Inputs must conform to entry point.
+*   -e [STEP]      Entry point for script. Inputs must conform to entry point.
 *                  RS: Split Reads (default) (Input: 2x .fastq[.gz])
 *                  BA: Alignment, Sort & Split to Contigs (Input: 2x .fastq[.gz])
 *                  MM: Merge Contig & Markduplicates (Input: 1x .bam)
@@ -63,12 +63,12 @@ $(for file in ${PLATFORMS}/*.bed; do platFile=$(basename $file); platName=${plat
 *                  Omit for final sample for individual.
 *                  ${ylw}Do not perform multiple runs simultaneously as final run will${nrm}
 *                  ${ylw}merge all partial samples for individual.${nrm}
-*   ${bred}-o             WIP (not working)${nrm}
+*   ${bred}-o [PATH]      WIP (not working)${nrm}
 *                  Path to final output location.
 *                  Default: /scratch/\$SCRATCH (/scratch/$USER)
-*   -r             Full path to reference file.
+*   -r [FILE]      Full path to reference file.
 *                  Default: \$REF_CORE ($REF_CORE)
-*   -t             Final output type: g.vcf, vcf. Will always end in .gz
+*   -t [EXT]       Final output type: g.vcf, vcf. Will always end in .gz
 *                  Default: g.vcf
 *
 *********************************"
@@ -121,13 +121,18 @@ do
 					export GENDER=Unknown
 					;;
 			esac
-			(printf "%-22s%s (%s)\n" "Gender" $GENDER "Fail on Autodetermination mismatch!" 1>&2)
+			(printf "%-22s%s (%s)\n" "Gender" $GENDER "Warns on Autodetermination mismatch!" 1>&2)
 			;;
 		i)
 			if [ ! -e ${OPTARG} ]; then
 				(echo "FAIL: Input file $OPTARG does not exist!" 1>&2)
 				# Print out input usage section.
 				usage | head -n 15 | tail -n 2
+				exit 1
+			fi
+			if [[ " ${FILE_LIST[@]} " =~ " ${OPTARG} " ]]
+			then
+				(echo "FAIL: Input file $OPTARG already added. Perhaps you want Read 2?" 1>&2)
 				exit 1
 			fi
 			export FILE_LIST=(${FILE_LIST[@]} ${OPTARG})
@@ -483,7 +488,7 @@ case $ENTRY_POINT in
 		(printf "%-22s" "Index Reads" 1>&2)
 		
 		if [ ! -e ${catReadsOutput%.bam}.bai.done ]; then
-			DEP_RI=$(sbatch $(dispatch "RI") -J RI_${IDN} $(depCheck $DEP_CR) $SLSBIN/catreadsindex.sl $catReadsOutput ${catReadsOutput%.bam}.bai | awk '{print $4}')
+			DEP_RI=$(sbatch $(dispatch "RI") -J RI_${IDN} $(depCheck $DEP_CR) $SLSBIN/catreadsindex.sl -i $catReadsOutput -o ${catReadsOutput%.bam}.bai | awk '{print $4}')
 			if [ $? -ne 0 ] || [ "$DEP_RI" == "" ]; then
 				(printf "FAILED!\n" 1>&2)
 				exit 1
