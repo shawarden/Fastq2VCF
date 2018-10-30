@@ -9,226 +9,231 @@
 # Merge exit codes from piped commands so any command that fails carries to $?
 set -o pipefail
 
-######################
-# General References #
-######################
-
-export ARRAYTHROTTLE="" # "%6" # Only allow 6 to run at a time.
-
-#export ENDPOINT_NESI=nesi#pan_auckland
-#export ENDPOINT_UOO=nesi#otago-dtn01
-
-export    RESOURCES=/resource
-export          BIN=FAIL
-export         PBIN=${EXEDIR}
-export       SLSBIN=${PBIN}/slurm-scripts
-export DESCRIPTIONS=${RESOURCES}/FastQdescriptions.txt
-
-#export       COMMON=${RESOURCES}/Hapmap3_3commonvariants.vcf
-export       BUNDLE=${RESOURCES}/bundles/broad_bundle_b37_v2.5
-export    PLATFORMS=${RESOURCES}/bundles/Capture_Platforms/GRCh37
-export        DBSNP=${BUNDLE}/dbsnp_141.GRCh37.vcf
-export        MILLS=${BUNDLE}/Mills_and_1000G_gold_standard.indels.b37.vcf
-export       INDELS=${BUNDLE}/1000G_phase1.indels.b37.vcf
-export     REF_CORE=${BUNDLE}/human_g1k_v37_decoy
-[ -z $REF ] && export REF=$REF_CORE
-
-export       COMMON=${RESOURCES}/Hapmap3_3commonvariants.vcf
-#export       BUNDLE=${RESOURCES}/v0
-#export        DBSNP=${BUNDLE}/Homo_sapiens_assembly38.dbsnp138.vcf
-#export        MILLS=${BUNDLE}/Mills_and_1000G_gold_standard.indels.hg38.vcf.gz
-#export       INDELS=${BUNDLE}/1000G_phase1.snps.high_confidence.hg38.vcf.gz
-#export          REF=${BUNDLE}/Homo_sapiens_assembly38
-
-export         REFA=${REF}.fasta
-export JOB_TEMP_DIR=$SHM_DIR
-#$([ "${TMPDIR}" != "" ] && echo "${TMPDIR}" || echo "$SCRATCH_DIR/tmp")
-
-if [ ! -d $SCRATCH ]
+if [ -e $HOME/fq2vcf.sh ]
 then
-	if [ -d /scratch/$USER ]
+	source $HOME/fq2vcf.sh
+else
+
+	######################
+	# General References #
+	######################
+
+	export ARRAYTHROTTLE="" # "%6" # Only allow 6 to run at a time.
+
+#	export ENDPOINT_NESI=nesi#pan_auckland
+#	export ENDPOINT_UOO=nesi#otago-dtn01
+
+	export    RESOURCES=/resource
+	export          BIN=FAIL
+	export         PBIN=${EXEDIR}
+	export       SLSBIN=${PBIN}/slurm-scripts
+	export DESCRIPTIONS=${RESOURCES}/FastQdescriptions.txt
+
+	export       COMMON=${RESOURCES}/Hapmap3_3commonvariants.vcf
+	export       BUNDLE=${RESOURCES}/bundles/broad_bundle_b37_v2.5
+	export    PLATFORMS=${RESOURCES}/bundles/Capture_Platforms/GRCh37
+	export        DBSNP=${BUNDLE}/dbsnp_141.GRCh37.vcf
+	export        MILLS=${BUNDLE}/Mills_and_1000G_gold_standard.indels.b37.vcf
+	export       INDELS=${BUNDLE}/1000G_phase1.indels.b37.vcf
+	export     REF_CORE=${BUNDLE}/human_g1k_v37_decoy
+	[ -z $REF ] && export REF=$REF_CORE
+
+#	export       COMMON=${RESOURCES}/Hapmap3_3commonvariants.vcf
+#	export       BUNDLE=${RESOURCES}/v0
+#	export        DBSNP=${BUNDLE}/Homo_sapiens_assembly38.dbsnp138.vcf
+#	export        MILLS=${BUNDLE}/Mills_and_1000G_gold_standard.indels.hg38.vcf.gz
+#	export       INDELS=${BUNDLE}/1000G_phase1.snps.high_confidence.hg38.vcf.gz
+#	export          REF=${BUNDLE}/Homo_sapiens_assembly38
+
+	export         REFA=${REF}.fasta
+	export JOB_TEMP_DIR=$SHM_DIR
+	#$([ "${TMPDIR}" != "" ] && echo "${TMPDIR}" || echo "$SCRATCH_DIR/tmp")
+
+	if [ ! -d $SCRATCH ]
 	then
-		export SCRATCH=/scratch/$USER
-	elif [ -d /scratch/jobs/$USER ]
-	then
-		export SCRATCH=/scratch/jobs/$USER
-	else
-		(echo "FAIL: Unable to locate scratch area!" 1>&2)
-		exit 1
+		if [ -d /scratch/$USER ]
+		then
+			export SCRATCH=/scratch/$USER
+		elif [ -d /scratch/jobs/$USER ]
+		then
+			export SCRATCH=/scratch/jobs/$USER
+		else
+			(echo "FAIL: Unable to locate scratch area!" 1>&2)
+			exit 1
+		fi
 	fi
+
+
+	##################################
+	# Version controlled executables #
+	##################################
+
+	export   ZIP_CMD=/usr/bin/pigz
+	export   CAT_CMD="${ZIP_CMD} -cd"
+	export SPLIT_CMD=/usr/bin/split
+
+	####################
+	# Modules versions #
+	####################
+
+	export MOD_ZLIB="zlib"
+	export MOD_JAVA="Java"
+
+	###############################
+	# FastQ Split Data management #
+	###############################
+
+	export FASTQ_MAXREAD=10000000	# How many reads per block.
+	export FASTQ_MAXSCAN=10000		# How many lines to check for best index.
+	export FASTQ_MAXDIFF=2			# Maximum index variation before new index is created.
+	export FASTQ_MAXJOBS=100		# Maximum number of alignment & sort array elements.
+	export FASTQ_MAXJOBZ=99			#$(($FASTQ_MAXJOBS - 1))	# Maximum number of alignment & sort array elements starting from 0.
+	export FASTQ_MAXZPAD=4			#${#FASTQ_MAXJOBS}	# Number of characters to pad to blocks.
+
+	# Minimum number of seconds between job submissions
+	# 200 submissions/10minutes = 20 submissions/minute = 3 seconds/submission.
+	# 600 submissions/60minutes = 10 submissions/minute = 6 seconds/submission.
+	# 5000 total jobs (including all array elements.
+	export MAX_JOB_RATE=6
+
+	###############
+	# EMAIL TYPES #
+	###############
+
+	# SLURM email notification types: NONE, BEGIN, END, FAIL, REQUEUE, ALL (BEGIN,
+	#  END, FAIL, REQUEUE, and STAGE_OUT), STAGE_OUT, TIME_LIMIT, TIME_LIMIT_90,
+	#  TIME_LIMIT_80, TIME_LIMIT_50, ARRAY_TASKS (send emails for each array task)
+	export MAIL_TYPE=FAIL,TIME_LIMIT,TIME_LIMIT_90,REQUEUE
+
+	##############################
+	# Job dispatch function data #
+	##############################
+	declare -A SB
+
+	# MWT: Calibrated Max Wall-Time in minutes.
+	# MWT,EXOME: Calibrated Max Wall-Time in minutes for exomic data.
+	# MEM: Memory allocation in megabytes
+	# CPT: Cores per Task
+
+	# Calculating base and per contig walltimes.
+	# combined read filesize:
+	# WALLTIME=BASE_MULTIPLIER * CONTIG_MULTIPLIER * CALIBRATED_MAX_WALLTIME * (INPUT_SIZE / CALIBRATED_INPUT_SIZE)
+	# WALLTIME=$(printf "%f\n" $(echo "${SB[BWTM]} * ${SB[WTM,${CONTIGNUMBER}]} * ${SB[${HEADER},MWT]} * ($INPUT_FILE_SIZE / $CALIBRATED_FILE_SIZE)" | bc -l))
+	#
+		SB[BWTM]=1.25	# Base wall-time multiplier.
+	#SB[MWT]=359		# Maximum wall-time to be in High partition.
+	SB[MWT]=1440	# 1 day.
+
+	# ReadSplit.
+	SB[RS]="ReadSplit"
+	SB[RS,MWT]=180
+	SB[RS,MEM]=3072
+	SB[RS,CPT]=6
+
+	# Block alignment (Merged PA, SS & CS)
+	SB[PA]="Align"
+	SB[SS]="Sort"
+	SB[CS]="CSplit"
+	SB[BA]="AlignSortSplit"
+	SB[BA,MWT]=360
+	SB[BA,MEM]=16384
+	SB[BA,CPT]=8
+
+	# Merge & Mark
+	SB[MC]="ContigMerge"
+	SB[MD]="MarkDup"
+	SB[MM]="MergeMark"
+	SB[MM,MWT]=450
+	SB[MM,MEM]=16384
+	SB[MM,CPT]=2
+
+	# Recal & Print
+	SB[BR]="BaseRecal"
+	SB[PR]="PrintReads"
+	SB[RC]="ReCal"
+	SB[RC,MWT]=666
+	SB[RC,MEM]=32768
+	SB[RC,CPT]=8
+
+	# DepthofCoverage
+	SB[DC]="DepthOfCoverage"
+	SB[DC,MWT,EXOME]=30
+	SB[DC,MWT]=60
+	SB[DC,MEM]=16384
+	SB[DC,CPT]=8
+
+	# GenderDetermination
+	SB[GD]="GenderDetermination"
+	SB[GD,MWT]=1
+	SB[GD,MEM]=128
+	SB[GD,CPT]=1
+
+	# HaplotypeCaller
+	SB[HC]="HaplotypeCaller"
+	SB[HC,MWT,EXOME]=60
+	SB[HC,MWT]=180
+	SB[HC,MEM]=32768
+	SB[HC,CPT]=8
+
+	# CatReads
+	SB[CR]="CatReads"
+	SB[CR,MWT]=120
+	SB[CR,MEM]=4096
+	SB[CR,CPT]=1
+
+	# ReadIndex
+	SB[RI]="IndexReads"
+	SB[RI,MWT]=480
+	SB[RI,MEM]=8192
+	SB[RI,CPT]=2
+
+	# CatVariants
+	SB[CV]="CatVariants"
+	SB[CV,MWT,EXOME]=60
+	SB[CV,MWT]=240
+	SB[CV,MEM]=16384
+	SB[CV,CPT]=2
+
+	# FingerPrint
+	SB[FP]="FingerPrint"
+	SB[FP,MWT]=${SB[MWT]}
+	SB[FP,MEM]=32768
+	SB[FP,CPT]=8
+
+	# SelectVariants
+	SB[SV]="SelectVariants"
+	SB[SV,MWT]=${SB[MWT]}
+	SB[SV,MEM]=32768
+	SB[SV,CPT]=8
+
+	# TransferFile
+	SB[TF]="Transfer"
+	SB[TF,MWT]=${SB[MWT]}
+	SB[TF,MEM]=6144
+	SB[TF,CPT]=2
+
+	export SB
+
+	######################
+	# Contig shinanigans #
+	######################
+
+	# Gender contigs have parts that are not created equal.
+	export XPAR1="X:1-2699520"
+	export TRUEX="X:2699521-154931043"
+	export XPAR2="X:154931044-155260560"
+	export TRUEY="Y:2649521-59034050"
+
+	#export YPAR1="chrY:10000-2781479"		# Hard masked to Ns in HG38
+	#export YPAR2="chrY:56887902-57217415"
+	#export TRUEY="chrY:2781480-56887901"	# Hard masked to Ns in HG38
+
+	#export XPAR1="chrX:10000-2781479"
+	#export XPAR2="chrX:155701382-156030895"
+	#export TRUEX="chrX:2781480-155701381"
+
+	# Call Per-user settings if they exist.
 fi
-
-
-##################################
-# Version controlled executables #
-##################################
-
-export   ZIP_CMD=/usr/bin/pigz
-export   CAT_CMD="${ZIP_CMD} -cd"
-export SPLIT_CMD=/usr/bin/split
-
-####################
-# Modules versions #
-####################
-
-export MOD_ZLIB="zlib"
-export MOD_JAVA="Java"
-
-###############################
-# FastQ Split Data management #
-###############################
-
-export FASTQ_MAXREAD=40000000	# How many reads per block.
-export FASTQ_MAXSCAN=10000		# How many lines to check for best index.
-export FASTQ_MAXDIFF=2			# Maximum index variation before new index is created.
-export FASTQ_MAXJOBS=100		# Maximum number of alignment & sort array elements.
-export FASTQ_MAXJOBZ=99			#$(($FASTQ_MAXJOBS - 1))	# Maximum number of alignment & sort array elements starting from 0.
-export FASTQ_MAXZPAD=4			#${#FASTQ_MAXJOBS}	# Number of characters to pad to blocks.
-
-# Minimum number of seconds between job submissions
-# 200 submissions/10minutes = 20 submissions/minute = 3 seconds/submission.
-# 600 submissions/60minutes = 10 submissions/minute = 6 seconds/submission.
-# 5000 total jobs (including all array elements.
-export MAX_JOB_RATE=6
-
-###############
-# EMAIL TYPES #
-###############
-
-# SLURM email notification types: NONE, BEGIN, END, FAIL, REQUEUE, ALL (BEGIN,
-#  END, FAIL, REQUEUE, and STAGE_OUT), STAGE_OUT, TIME_LIMIT, TIME_LIMIT_90,
-#  TIME_LIMIT_80, TIME_LIMIT_50, ARRAY_TASKS (send emails for each array task)
-export MAIL_TYPE=FAIL,TIME_LIMIT,TIME_LIMIT_90,REQUEUE
-
-##############################
-# Job dispatch function data #
-##############################
-declare -A SB
-
-# MWT: Calibrated Max Wall-Time in minutes.
-# MWT,EXOME: Calibrated Max Wall-Time in minutes for exomic data.
-# MEM: Memory allocation in megabytes
-# CPT: Cores per Task
-
-# Calculating base and per contig walltimes.
-# combined read filesize:
-# WALLTIME=BASE_MULTIPLIER * CONTIG_MULTIPLIER * CALIBRATED_MAX_WALLTIME * (INPUT_SIZE / CALIBRATED_INPUT_SIZE)
-# WALLTIME=$(printf "%f\n" $(echo "${SB[BWTM]} * ${SB[WTM,${CONTIGNUMBER}]} * ${SB[${HEADER},MWT]} * ($INPUT_FILE_SIZE / $CALIBRATED_FILE_SIZE)" | bc -l))
-#
-SB[BWTM]=1.25	# Base wall-time multiplier.
-#SB[MWT]=359		# Maximum wall-time to be in High partition.
-SB[MWT]=1440	# 1 day.
-
-# ReadSplit.
-SB[RS]="ReadSplit"
-SB[RS,MWT]=180
-SB[RS,MEM]=3072
-SB[RS,CPT]=6
-
-# Block alignment (Merged PA, SS & CS)
-SB[PA]="Align"
-SB[SS]="Sort"
-SB[CS]="CSplit"
-SB[BA]="AlignSortSplit"
-SB[BA,MWT]=360
-SB[BA,MEM]=16384
-SB[BA,CPT]=8
-
-# Merge & Mark
-SB[MC]="ContigMerge"
-SB[MD]="MarkDup"
-SB[MM]="MergeMark"
-SB[MM,MWT]=450
-SB[MM,MEM]=16384
-SB[MM,CPT]=2
-
-# Recal & Print
-SB[BR]="BaseRecal"
-SB[PR]="PrintReads"
-SB[RC]="ReCal"
-SB[RC,MWT]=666
-SB[RC,MEM]=32768
-SB[RC,CPT]=8
-
-# DepthofCoverage
-SB[DC]="DepthOfCoverage"
-SB[DC,MWT,EXOME]=30
-SB[DC,MWT]=60
-SB[DC,MEM]=16384
-SB[DC,CPT]=8
-
-# GenderDetermination
-SB[GD]="GenderDetermination"
-SB[GD,MWT]=1
-SB[GD,MEM]=128
-SB[GD,CPT]=1
-
-# HaplotypeCaller
-SB[HC]="HaplotypeCaller"
-SB[HC,MWT,EXOME]=60
-SB[HC,MWT]=180
-SB[HC,MEM]=32768
-SB[HC,CPT]=8
-
-# CatReads
-SB[CR]="CatReads"
-SB[CR,MWT]=120
-SB[CR,MEM]=4096
-SB[CR,CPT]=1
-
-# ReadIndex
-SB[RI]="IndexReads"
-SB[RI,MWT]=480
-SB[RI,MEM]=8192
-SB[RI,CPT]=2
-
-# CatVariants
-SB[CV]="CatVariants"
-SB[CV,MWT,EXOME]=60
-SB[CV,MWT]=240
-SB[CV,MEM]=16384
-SB[CV,CPT]=2
-
-# FingerPrint
-SB[FP]="FingerPrint"
-SB[FP,MWT]=${SB[MWT]}
-SB[FP,MEM]=32768
-SB[FP,CPT]=8
-
-# SelectVariants
-SB[SV]="SelectVariants"
-SB[SV,MWT]=${SB[MWT]}
-SB[SV,MEM]=32768
-SB[SV,CPT]=8
-
-# TransferFile
-SB[TF]="Transfer"
-SB[TF,MWT]=${SB[MWT]}
-SB[TF,MEM]=6144
-SB[TF,CPT]=2
-
-export SB
-
-######################
-# Contig shinanigans #
-######################
-
-# Gender contigs have parts that are not created equal.
-export XPAR1="X:1-2699520"
-export TRUEX="X:2699521-154931043"
-export XPAR2="X:154931044-155260560"
-export TRUEY="Y:2649521-59034050"
-
-#export YPAR1="chrY:10000-2781479"		# Hard masked to Ns in HG38
-#export YPAR2="chrY:56887902-57217415"
-#export TRUEY="chrY:2781480-56887901"	# Hard masked to Ns in HG38
-
-#export XPAR1="chrX:10000-2781479"
-#export XPAR2="chrX:155701382-156030895"
-#export TRUEX="chrX:2781480-155701381"
-
-# Call Per-user settings if they exist.
-[ -e $HOME/fq2vcf.sh ] && source $HOME/fq2vcf.sh
 
 export SLURM_VERSION=$(scontrol -V | awk '{print $2}')
 
