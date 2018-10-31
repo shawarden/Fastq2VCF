@@ -13,15 +13,16 @@ if [ -e $HOME/fq2vcf.sh ]
 then
 	source $HOME/fq2vcf.sh
 else
-
 	######################
 	# General References #
 	######################
 
+	export WORK_PATH="/scratch/$USER"
+
 	export ARRAYTHROTTLE="" # "%6" # Only allow 6 to run at a time.
 
-#	export ENDPOINT_NESI=nesi#pan_auckland
-#	export ENDPOINT_UOO=nesi#otago-dtn01
+	#export ENDPOINT_NESI=nesi#pan_auckland
+	#export ENDPOINT_UOO=nesi#otago-dtn01
 
 	export    RESOURCES=/resource
 	export          BIN=FAIL
@@ -38,12 +39,12 @@ else
 	export     REF_CORE=${BUNDLE}/human_g1k_v37_decoy
 	[ -z $REF ] && export REF=$REF_CORE
 
-#	export       COMMON=${RESOURCES}/Hapmap3_3commonvariants.vcf
-#	export       BUNDLE=${RESOURCES}/v0
-#	export        DBSNP=${BUNDLE}/Homo_sapiens_assembly38.dbsnp138.vcf
-#	export        MILLS=${BUNDLE}/Mills_and_1000G_gold_standard.indels.hg38.vcf.gz
-#	export       INDELS=${BUNDLE}/1000G_phase1.snps.high_confidence.hg38.vcf.gz
-#	export          REF=${BUNDLE}/Homo_sapiens_assembly38
+	#export       COMMON=${RESOURCES}/Hapmap3_3commonvariants.vcf
+	#export       BUNDLE=${RESOURCES}/v0
+	#export        DBSNP=${BUNDLE}/Homo_sapiens_assembly38.dbsnp138.vcf
+	#export        MILLS=${BUNDLE}/Mills_and_1000G_gold_standard.indels.hg38.vcf.gz
+	#export       INDELS=${BUNDLE}/1000G_phase1.snps.high_confidence.hg38.vcf.gz
+	#export          REF=${BUNDLE}/Homo_sapiens_assembly38
 
 	export         REFA=${REF}.fasta
 	export JOB_TEMP_DIR=$SHM_DIR
@@ -62,7 +63,6 @@ else
 			exit 1
 		fi
 	fi
-
 
 	##################################
 	# Version controlled executables #
@@ -231,8 +231,6 @@ else
 	#export XPAR1="chrX:10000-2781479"
 	#export XPAR2="chrX:155701382-156030895"
 	#export TRUEX="chrX:2781480-155701381"
-
-	# Call Per-user settings if they exist.
 fi
 
 export SLURM_VERSION=$(scontrol -V | awk '{print $2}')

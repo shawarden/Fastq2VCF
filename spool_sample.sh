@@ -65,7 +65,7 @@ $(for file in ${PLATFORMS}/*.bed; do platFile=$(basename $file); platName=${plat
 *                  ${ylw}merge all partial samples for individual.${nrm}
 *   ${bred}-o [PATH]      WIP (not working)${nrm}
 *                  Path to final output location.
-*                  Default: /scratch/\$SCRATCH (/scratch/$USER)
+*                  Default: $WORK_PATH
 *   -r [FILE]      Full path to reference file.
 *                  Default: \$REF_CORE ($REF_CORE)
 *   -t [EXT]       Final output type: g.vcf, vcf. Will always end in .gz
@@ -201,8 +201,6 @@ if [ "${SAMPLE}" == "" ] || [ "${PLATFORM}" == "" ]; then
 	usage # | head -n 20
 	exit 1
 fi
-
-export WORK_PATH="/scratch/$USER"
 
 if [ "$MAIL_USER" == "" ]; then
 	if [ -e /etc/slurm/userlist.txt ]
