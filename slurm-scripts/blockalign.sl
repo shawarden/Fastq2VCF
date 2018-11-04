@@ -8,6 +8,7 @@
 #SBATCH --output	slurm/BA_%A_%a.out
 
 echo "$(date) on $(hostname)"
+echo "Path = $PATH"
 
 export RAMDISK=2
 
@@ -158,6 +159,8 @@ if [ ! -e sorted/${BLOCK}.done ]; then
 	HEADER="PA"
 	JOBSTEP=0
 	echo "$HEADER: Aligning! $BWA_REF"
+	
+	echo "Path = $PATH"
 	
 	module purge
 	module load BWA SAMtools
