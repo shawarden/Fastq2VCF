@@ -166,6 +166,8 @@ if [ ! -e sorted/${BLOCK}.done ]; then
 	CMD="srun $(which bwa) mem -M -t ${SLURM_JOB_CPUS_PER_NODE} -R @RG'\t'$RG_ID'\t'$RG_PL'\t'$RG_PU'\t'$RG_LB'\t'$RG_SM $BWA_REF $READ1 $READ2 | $(which samtools) view -bh - > $SHM_DIR/align_${BLOCK}.bam"
 	echo "$HEADER: ${CMD}" | tee -a ../commands.txt
 	
+	echo "Path = $PATH"
+	
 	scontrol update jobid=${SLURM_ARRAY_JOB_ID}_${SLURM_ARRAY_TASK_ID} name=${SAMPLE}_Aligning_${BLOCK}
 	
 	if ! eval ${CMD}; then
