@@ -107,7 +107,7 @@ fi
 # Block depends on input or array id.
 export BLOCK=$(printf "%0${FASTQ_MAXZPAD}d" $SLURM_ARRAY_TASK_ID)
    
-OUTPUT=split/${BLOCK}/contig_split
+OUTPUT=${WORK_PATH}/split/${BLOCK}/contig_split
 mkdir -p $(dirname ${OUTPUT})
 
 export HEADER="BA"

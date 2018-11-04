@@ -744,7 +744,7 @@ export -f dispatch
 function jobStats {
 echo -e "$HEADER:\tWalltime: $(printHMS $(printSeconds ${SB[$HEADER,MWT]}))"
 	echo -e "\tCores:    ${SB[$HEADER,CPT]}"
-	echo -e "\tMemory:   $((${SB[$HEADER,MPC]} * ${SB[$HEADER,CPT]}))"
+	echo -e "\tMemory:   ${SB[$HEADER,MEM]}"
 }
 export -f jobStats
 

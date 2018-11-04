@@ -19,6 +19,13 @@
 
 # Update history
 
+## 2018-11-05
+
+### Fixed
+
+- Legacy reference to MemPerCore
+- split dir referencing root.
+
 ## 2018-10-10
 
 ### Changed
