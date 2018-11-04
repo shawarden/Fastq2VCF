@@ -21,7 +21,7 @@
 
 ## 2018-11-05
 
-### Fixed
+### Fixed 
 
 - Legacy reference to MemPerCore
 - split dir referencing root.
