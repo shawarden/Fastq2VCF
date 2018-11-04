@@ -86,7 +86,6 @@ if ! inFile;  then exit $EXIT_IO; fi
 if ! outDirs; then exit $EXIT_IO; fi
 if ! outFile; then exit $EXIT_IO; fi
 
-module purge
 module load SAMtools
 
 CMD="srun $(which samtools) index ${INPUT} ${JOB_TEMP_DIR}/${OUTPUT}"

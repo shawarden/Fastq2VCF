@@ -162,8 +162,8 @@ if [ ! -e sorted/${BLOCK}.done ]; then
 	
 	echo "Path = $PATH"
 	
-	module purge
-	module load BWA SAMtools
+	module load BWA
+	module load SAMtools
 	
 	# Pipe output from alignment into sortsam
 	CMD="srun $(which bwa) mem -M -t ${SLURM_JOB_CPUS_PER_NODE} -R @RG'\t'$RG_ID'\t'$RG_PL'\t'$RG_PU'\t'$RG_LB'\t'$RG_SM $BWA_REF $READ1 $READ2 | $(which samtools) view -bh - > $SHM_DIR/align_${BLOCK}.bam"
@@ -186,7 +186,6 @@ if [ ! -e sorted/${BLOCK}.done ]; then
 	HEADER="SS"
 	JOBSTEP=1
 	
-	module purge
 	module load picard
 	
 	CMD="srun $(which java) ${JAVA_ARGS} -jar $EBROOTPICARD/picard.jar SortSam ${PIC_ARGS} ${SORT_ARGS} INPUT=$SHM_DIR/align_${BLOCK}.bam OUTPUT=$SHM_DIR/sorted_${BLOCK}.bam"
@@ -212,7 +211,6 @@ HEADER="CS"
 JOBSTEP=2
 echo "$HEADER: Splitting by contig"
 
-module purge
 module load SAMtools
 
 scontrol update jobid=${SLURM_ARRAY_JOB_ID}_${SLURM_ARRAY_TASK_ID} name=${SAMPLE}_SplitByContig_${BLOCK}

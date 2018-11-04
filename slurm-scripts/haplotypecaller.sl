@@ -163,7 +163,6 @@ if [ ! -e $INPUT_BAI ]; then
 		echo "FAIL: Unable to index $INPUT"
 		exit $EXIT_PR
 	fi
-	module purge
 fi
 
 GATK_PROC=HaplotypeCaller
@@ -177,7 +176,6 @@ GATK_ARGS="-T ${GATK_PROC} \
 [ "$FINAL_TYPE" == "g.vcf" ] && GATK_ARGS="$GATK_ARGS --emitRefConfidence GVCF"
 [ "$FINAL_TYPE" == "vcf" ] && GATK_ARGS="$GATK_ARGS -variant_index_type LINEAR -variant_index_parameter 128000"
 
-module purge
 module load GATK
 
 CMD="srun $(which java) ${JAVA_ARGS} -jar $EBROOTGATK/GenomeAnalysisTK.jar ${GATK_ARGS} ${inputList} -o ${JOB_TEMP_DIR}/${OUTPUT}"

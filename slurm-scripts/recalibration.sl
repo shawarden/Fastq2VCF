@@ -108,10 +108,8 @@ if [ ! -e $INPUT_BAI ]; then
 	module load SAMtools
 	scontrol update jobid=${SLURM_ARRAY_JOB_ID}_${SLURM_ARRAY_TASK_ID} name=${IDN}_Indexing_BAM_${CONTIG}_$SLURM_ARRAY_TASK_ID
 	samtools index $INPUT $INPUT_BAI
-	module purge
 fi
 
-module purge
 module load GATK
 HEADER="BR"
 

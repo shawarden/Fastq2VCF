@@ -105,7 +105,6 @@ GATK_ARGS="${GATK_PROC} \
 -R ${REFA} \
 --assumeSorted"
 
-module purge
 module load GATK
 
 CMD="srun $(which java) ${JAVA_ARGS} -cp $EBROOTGATK/GenomeAnalysisTK.jar ${GATK_ARGS} ${mergeList} -out ${SCRATCH_DIR}/${OUTPUT}"

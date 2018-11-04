@@ -154,7 +154,6 @@ GATK_ARGS="-T ${GATK_PROC} \
 --omitIntervalStatistics \
 -nt ${SLURM_JOB_CPUS_PER_NODE}"
 
-module purge
 module load GATK
 
 CMD="srun $(which java) ${JAVA_ARGS} -jar $EBROOTGATK/GenomeAnalysisTK.jar ${GATK_ARGS} ${inputList} -o ${OUTPUT}"

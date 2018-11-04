@@ -121,7 +121,6 @@ fi
 if ! outDirs; then exit $EXIT_IO; fi
 if ! outFile; then exit $EXIT_IO; fi
 
-module purge
 module load picard
 
 #HEADER="MC"
