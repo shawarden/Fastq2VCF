@@ -25,6 +25,7 @@
 
 - Legacy reference to MemPerCore
 - split dir referencing root.
+- File pathing
 
 ## 2018-10-10
 

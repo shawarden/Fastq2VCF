@@ -269,7 +269,7 @@ case $ENTRY_POINT in
 		
 		for i in $(seq 1 2); do
 			# Cycle through reads.
-			if [ ! -e ${SAMPLE}_R${i}_split.done ]; then
+			if [ ! -e ${RUN_PATH}/${SAMPLE}_R${i}_split.done ]; then
 				# Read# split isn't complete. Add to array.
 				splitReadArray=$(appendList "$splitReadArray" ${i} ",")
 			fi
@@ -344,7 +344,7 @@ case $ENTRY_POINT in
 		fi
 		
 		for i in $(seq 1 $readBlocks); do
-			if [ ! -e split/$(printf "%0${FASTQ_MAXZPAD}d" $i)/contig_split.done ]; then
+			if [ ! -e ${RUN_PATH}/split/$(printf "%0${FASTQ_MAXZPAD}d" $i)/contig_split.done ]; then
 				# This contig block hasn't been split yet.
 				alignArray=$(appendList "$alignArray" $i ",")
 			fi
@@ -389,7 +389,7 @@ case $ENTRY_POINT in
 			for i in $(seq 1 ${NUMCONTIG_BLOCKS}); do
 				contig=${CONTIGBLOCKS[$i]}	# Does bash do array lookups every time too?
 				#printf "%04d %-22s " $i $contig
-				mergeOutput=markdup/${contig}.bam
+				mergeOutput=${SAMPLE_PATH}/markdup/${contig}.bam
 				mkdir -p $(dirname $mergeOutput)
 				if [ ! -e ${mergeOutput}.done ]; then
 					mergeArray=$(appendList "$mergeArray"  $i ",")
@@ -430,7 +430,7 @@ case $ENTRY_POINT in
 		for i in $(seq 1 ${NUMCONTIG_BLOCKS}); do
 			contig=${CONTIGBLOCKS[$i]}	# Does bash do array lookups every time too?
 			#printf "%04d %-22s " $i $contig
-			recalOutput=printreads/${contig}.bam
+			recalOutput=${SAMPLE_PATH}/printreads/${contig}.bam
 			catReadsInputs=$(appendList "$catReadsInputs" "-i ${recalOutput}" " ")
 			mkdir -p $(dirname $recalOutput)
 			
@@ -462,7 +462,7 @@ case $ENTRY_POINT in
 		
 		(printf "%-22s" "ConcatReads" 1>&2)
 		
-		catReadsOutput=${IDN}.bam
+		catReadsOutput=${SAMPLE_PATH}/${IDN}.bam
 		
 		# Merge print-read bams.
 		if [ ! -e ${catReadsOutput}.done ]; then
@@ -485,7 +485,7 @@ case $ENTRY_POINT in
 		
 		(printf "%-22s" "Index Reads" 1>&2)
 		
-		if [ ! -e ${catReadsOutput%.bam}.bai.done ]; then
+		if [ ! -e ${SAMPLE_PATH}/${catReadsOutput%.bam}.bai.done ]; then
 			DEP_RI=$(sbatch $(dispatch "RI") -J RI_${IDN} $(depCheck $DEP_CR) $SLSBIN/catreadsindex.sl -i $catReadsOutput -o ${catReadsOutput%.bam}.bai | awk '{print $4}')
 			if [ $? -ne 0 ] || [ "$DEP_RI" == "" ]; then
 				(printf "FAILED!\n" 1>&2)
@@ -533,7 +533,7 @@ case $ENTRY_POINT in
 			contig=${CONTIGBLOCKS[$i]}	# Does bash do array lookups every time too?
 			#printf "%04d %-22s " $i $contig
 			
-			depthOutput=depth/${contig} #.sample_summary
+			depthOutput=${SAMPLE_PATH}/depth/${contig} #.sample_summary
 			
 			mkdir -p $(dirname $depthOutput)
 			
@@ -584,7 +584,7 @@ case $ENTRY_POINT in
 			contig=${CONTIGBLOCKS[$i]}	# Does bash do array lookups every time too?
 			#printf "%04d %-22s " $i $contig
 			
-			haploOutput=haplo/${contig}.${FINAL_TYPE}.gz
+			haploOutput=${SAMPLE_PATH}/haplo/${contig}.${FINAL_TYPE}.gz
 			
 			mkdir -p $(dirname $haploOutput)
 			
@@ -626,7 +626,7 @@ case $ENTRY_POINT in
 		
 		(printf "%-22s" "Gender Determination" 1>&2)
 
-		if [ ! -e coverage.sh.done ]; then
+		if [ ! -e ${SAMPLE_PATH}/coverage.sh.done ]; then
 			DEP_GD=$(sbatch $(dispatch "GD") -J GD_${IDN} $(depCheck $DEP_DC) $SLSBIN/coverage.sl -s $IDN -p $PLATFORM $([ "$GENDER" != "" ] && echo "-g $GENDER") $([ "$SEXCHR" != "" ] && echo "-c $SEXCHR") | awk '{print $4}')
 			if [ $? -ne 0 ] || [ "$DEP_GD" == "" ]; then
 				(printf "FAILED!\n" 1>&2)
@@ -653,7 +653,7 @@ case $ENTRY_POINT in
 		
 		(printf "%-22s" "HaplotypeCaller XPAR1" 1>&2)
 		
-		if [ ! -e ${haploXPar1Output}.done ]; then
+		if [ ! -e ${SAMPLE_PATH}/${haploXPar1Output}.done ]; then
 			DEP_HCXPAR1=$(sbatch $(dispatch "HC") -J HC_${IDN}_XPAR1 --array=90 $(depCheck $DEP_GD) $SLSBIN/haplotypecaller.sl  -c "$XPAR1" $depthInput | awk '{print $4}')
 			if [ $? -ne 0 ] || [ "$DEP_HCXPAR1" == "" ]; then
 				(printf "FAILED!\n"  1>&2)
@@ -668,7 +668,7 @@ case $ENTRY_POINT in
 		
 		(printf "%-22s" "HaplotypeCaller TRUEX" 1>&2)
 		
-		if [ ! -e ${haploTRUEXOutput}.done ]; then
+		if [ ! -e ${SAMPLE_PATH}/${haploTRUEXOutput}.done ]; then
 			DEP_HCTRUEX=$(sbatch $(dispatch "HC") -J HC_${IDN}_TRUEX --array=91 $(depCheck $DEP_GD) $SLSBIN/haplotypecaller.sl -c "$TRUEX" $depthInput | awk '{print $4}')
 			if [ $? -ne 0 ] || [ "$DEP_HCTRUEX" == "" ]; then
 				(printf "FAILED!\n" 1>&2)
@@ -683,7 +683,7 @@ case $ENTRY_POINT in
 		
 		(printf "%-22s" "HaplotypeCaller XPAR2" 1>&2)
 		
-		if [ ! -e ${haploXPar2Output}.done ]; then
+		if [ ! -e ${SAMPLE_PATH}/${haploXPar2Output}.done ]; then
 			DEP_HCXPAR2=$(sbatch $(dispatch "HC") -J HC_${IDN}_XPAR2 --array=92 $(depCheck $DEP_GD) $SLSBIN/haplotypecaller.sl -c "$XPAR2" $depthInput | awk '{print $4}')
 			if [ $? -ne 0 ] || [ "$DEP_HCXPAR2" == "" ]; then
 				(printf "FAILED!\n" 1>&2)
@@ -698,7 +698,7 @@ case $ENTRY_POINT in
 		
 		(printf "%-22s" "HaplotypeCaller Y" 1>&2)
 		
-		if [ ! -e ${haploYOutput}.done ]; then
+		if [ ! -e ${SAMPLE_PATH}/${haploYOutput}.done ]; then
 			DEP_HCY=$(sbatch $(dispatch "HC") -J HC_${IDN}_Y --array=93 $(depCheck $DEP_GD) ${SLSBIN}/haplotypecaller.sl -c "Y" $depthInput | awk '{print $4}')
 			if [ $? -ne 0 ] || [ "$DEP_HCY" == "" ]; then
 				(printf "FAILED!\n" 1>&2)
@@ -720,7 +720,7 @@ case $ENTRY_POINT in
 		
 		(printf "%-22s" "CatVariants" 1>&2)
 		
-		catVarOutput=${IDN}.${FINAL_TYPE}.gz
+		catVarOutput=${SAMPLE_PATH}/${IDN}.${FINAL_TYPE}.gz
 		CatVarInputs=""
 		
 		for contig in ${CONTIGARRAY[@]}; do
