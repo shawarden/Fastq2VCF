@@ -110,10 +110,15 @@ if [ ! -e $INPUT_BAI ]; then
 	samtools index $INPUT $INPUT_BAI
 fi
 
-module load GATK
+if [ -z $GATK_JAR ]
+then
+	module load GATK
+	GATK_JAR=$EBROOTGATK/GenomeAnalysisTK.jar
+fi
+
 HEADER="BR"
 
-CMD="srun $(which java) ${JAVA_ARGS} -jar $EBROOTGATK/GenomeAnalysisTK.jar ${GATK_BSQR} -L ${CONTIG} ${GATK_ARGS} -I ${INPUT} -o ${JOB_TEMP_DIR}/${BQSR}"
+CMD="srun $(which java) ${JAVA_ARGS} -jar $GATK_JAR ${GATK_BSQR} -L ${CONTIG} ${GATK_ARGS} -I ${INPUT} -o ${JOB_TEMP_DIR}/${BQSR}"
 echo "$HEADER: ${CMD}" | tee -a commands.txt
 
 JOBSTEP=0

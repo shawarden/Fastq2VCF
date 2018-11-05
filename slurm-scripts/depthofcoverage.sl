@@ -154,9 +154,13 @@ GATK_ARGS="-T ${GATK_PROC} \
 --omitIntervalStatistics \
 -nt ${SLURM_JOB_CPUS_PER_NODE}"
 
-module load GATK
+if [ -z $GATK_JAR ]
+then
+	module load GATK
+	GATK_JAR=$EBROOTGATK/GenomeAnalysisTK.jar
+fi
 
-CMD="srun $(which java) ${JAVA_ARGS} -jar $EBROOTGATK/GenomeAnalysisTK.jar ${GATK_ARGS} ${inputList} -o ${OUTPUT}"
+CMD="srun $(which java) ${JAVA_ARGS} -jar $GATK_JAR ${GATK_ARGS} ${inputList} -o ${OUTPUT}"
 echo "$HEADER: ${CMD}" | tee -a commands.txt
 
 JOBSTEP=0

@@ -176,9 +176,13 @@ GATK_ARGS="-T ${GATK_PROC} \
 [ "$FINAL_TYPE" == "g.vcf" ] && GATK_ARGS="$GATK_ARGS --emitRefConfidence GVCF"
 [ "$FINAL_TYPE" == "vcf" ] && GATK_ARGS="$GATK_ARGS -variant_index_type LINEAR -variant_index_parameter 128000"
 
-module load GATK
+if [ -z $GATK_JAR ]
+then
+	module load GATK
+	GATK_JAR=$EBROOTGATK/GenomeAnalysisTK.jar
+fi
 
-CMD="srun $(which java) ${JAVA_ARGS} -jar $EBROOTGATK/GenomeAnalysisTK.jar ${GATK_ARGS} ${inputList} -o ${JOB_TEMP_DIR}/${OUTPUT}"
+CMD="srun $(which java) ${JAVA_ARGS} -jar $GATK_JAR ${GATK_ARGS} ${inputList} -o ${JOB_TEMP_DIR}/${OUTPUT}"
 echo "$HEADER ${CMD}" | tee -a commands.txt
 
 JOBSTEP=0

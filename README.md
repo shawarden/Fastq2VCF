@@ -27,6 +27,10 @@
 - split dir referencing root.
 - File pathing
 
+### Added
+
+- Manually settable GATK_JAR path.
+
 ## 2018-10-10
 
 ### Changed

@@ -105,9 +105,13 @@ GATK_ARGS="${GATK_PROC} \
 -R ${REFA} \
 --assumeSorted"
 
-module load GATK
+if [ -z $GATK_JAR ]
+then
+	module load GATK
+	GATK_JAR=$EBROOTGATK/GenomeAnalysisTK.jar
+fi
 
-CMD="srun $(which java) ${JAVA_ARGS} -cp $EBROOTGATK/GenomeAnalysisTK.jar ${GATK_ARGS} ${mergeList} -out ${SCRATCH_DIR}/${OUTPUT}"
+CMD="srun $(which java) ${JAVA_ARGS} -cp $GATK_JAR ${GATK_ARGS} ${mergeList} -out ${SCRATCH_DIR}/${OUTPUT}"
 echo "$HEADER ${CMD}" | tee -a commands.txt
 
 JOBSTEP=0
