@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -e
 #SBATCH --job-name	CatVariants
 #SBATCH --time		359
 #SBATCH --mem		16G

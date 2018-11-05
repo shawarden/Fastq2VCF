@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -e
 #SBATCH --job-name	ReadIndex
 #SBATCH --time		0-01:30:00
 #SBATCH --mem		4G

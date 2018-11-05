@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -e
 #SBATCH --job-name	CatReads
 #SBATCH --time		60
 #SBATCH --mem		4G

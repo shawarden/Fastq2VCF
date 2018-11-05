@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -e
 #SBATCH --job-name	FingerPrintCaller
 #SBATCH --time		0-06:00:00
 #SBATCH --mem		32G

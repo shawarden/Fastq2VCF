@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -e -e
 
 #############################################################
 # Generates job sequence for a given individual/sample list #

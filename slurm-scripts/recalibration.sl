@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -e
 #SBATCH --job-name	Recalibration
 #SBATCH --time		359
 #SBATCH --mem		32G

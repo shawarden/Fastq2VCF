@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -e 
 
 ###########
 # Base Reference file contains everything I don't want to retype in every script.

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -e
 #SBATCH --job-name	GenderDetermination
 #SBATCH --time		0-00:10:00
 #SBATCH --mem		512

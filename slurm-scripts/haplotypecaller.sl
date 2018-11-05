@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -e
 #SBATCH --job-name	HaplotypeCaller
 #SBATCH --time		0-03:00:00
 #SBATCH --mem		32G
