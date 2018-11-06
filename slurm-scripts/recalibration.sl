@@ -136,7 +136,7 @@ SECONDS=0
 
 HEADER="PR"
 
-CMD="srun $(which java) ${JAVA_ARGS} -jar $EBROOTGATK/GenomeAnalysisTK.jar ${GATK_READ} -L ${CONTIG} ${GATK_ARGS} -I ${INPUT} -BQSR ${JOB_TEMP_DIR}/${BQSR} -o ${OUTPUT}"
+CMD="srun $(which java) ${JAVA_ARGS} -jar GATK_JAR ${GATK_READ} -L ${CONTIG} ${GATK_ARGS} -I ${INPUT} -BQSR ${JOB_TEMP_DIR}/${BQSR} -o ${OUTPUT}"
 echo "$HEADER: ${CMD}" | tee -a commands.txt
 
 JOBSTEP=1
