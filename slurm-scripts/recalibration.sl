@@ -112,6 +112,7 @@ fi
 
 if [ -z $GATK_JAR ]
 then
+	echo "Loading GATK Module"
 	module load GATK
 	GATK_JAR=$EBROOTGATK/GenomeAnalysisTK.jar
 fi

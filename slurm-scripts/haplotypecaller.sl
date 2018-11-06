@@ -178,8 +178,10 @@ GATK_ARGS="-T ${GATK_PROC} \
 
 if [ -z $GATK_JAR ]
 then
+	echo "Loading GATK Module"
 	module load GATK
 	GATK_JAR=$EBROOTGATK/GenomeAnalysisTK.jar
+
 fi
 
 CMD="srun $(which java) ${JAVA_ARGS} -jar $GATK_JAR ${GATK_ARGS} ${inputList} -o ${JOB_TEMP_DIR}/${OUTPUT}"
