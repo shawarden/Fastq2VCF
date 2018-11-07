@@ -147,7 +147,7 @@ else
 	intervalPloidy=2
 fi
 
-echo "$HEADER: ${INPUT} + ${CONTIG}c + ${intervalPloidy}p -> ${OUTPUT}"
+(echo "$HEADER: ${INPUT} + ${CONTIG}c + ${intervalPloidy}p -> ${OUTPUT}" 1>&2)
 
 
 # Make sure input and target folders exists and that output file does not!
