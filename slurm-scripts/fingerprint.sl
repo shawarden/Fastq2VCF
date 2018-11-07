@@ -6,7 +6,8 @@
 #SBATCH --error		slurm/FPH_%j.out
 #SBATCH --output	slurm/FPH_%j.out
 
-echo "$(date) on $(hostname)"
+(echo "$(date) on $(hostname)" 1>&2)
+(echo $0 $* 1>&2)
 
 if [ -e $EXEDIR/baserefs.sh ]
 then
@@ -22,7 +23,7 @@ OUTPUT=${INPUT%.bam}.vcf.gz
 
 HEADER="FHC"
 
-echo "$HEADER: ${INPUT} -> ${OUTPUT}"
+(echo "$HEADER: ${INPUT} -> ${OUTPUT}" 1>&2)
 
 
 # Make sure input and target folders exists and that output file does not!
@@ -39,7 +40,7 @@ GATK_ARGS="-T ${GATK_PROC} \
 module load ${MOD_JAVA}
 
 CMD="srun $(which java) ${JAVA_ARGS} -jar $GATK ${GATK_ARGS} -I ${INPUT} -o ${JOB_TEMP_DIR}/${OUTPUT}"
-echo "$HEADER: ${CMD}" | tee -a commands.txt
+(echo "$HEADER: ${CMD}" | tee -a commands.txt 1>&2)
 
 JOBSTEP=0
 

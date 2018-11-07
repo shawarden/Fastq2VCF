@@ -6,7 +6,8 @@
 #SBATCH --error		slurm/CV_%j.out
 #SBATCH --output	slurm/CV_%j.out
 
-echo "$(date) on $(hostname)"
+(echo "$(date) on $(hostname)" 1>&2)
+(echo $0 $* 1>&2)
 
 if [ -e $EXEDIR/baserefs.sh ]
 then
@@ -17,7 +18,7 @@ fi
 
 
 function usage {
-echo -e "\
+(echo -e "\
 ****************************************
 * This script will concatonate multple *
 * VCF files into a single VCF file     *
@@ -34,7 +35,7 @@ echo -e "\
 *   -r [FILE]      Full path to reference file.
 *                  Default: \$REF_CORE ($REF_CORE)
 *
-*********************************"
+*********************************" 1>&2)
 }
 
 while getopts "i:r:o:" OPTION
@@ -43,7 +44,7 @@ do
 	case $OPTION in
 		i)
 			if [ ! -e ${OPTARG} ]; then
-				echo "FAIL: Input file $OPTARG does not exist!"
+				(echo "FAIL: Input file $OPTARG does not exist!" 1>&2)
 				exit 1
 			fi
 			if [[ " ${FILE_LIST[@]} " =~ " ${OPTARG} " ]]
@@ -57,7 +58,7 @@ do
 		r)
 			export REF=${OPTARG}
 			if [ ! -e $REF ]; then
-				echo "FAIL: $REF does not exist"
+				(echo "FAIL: $REF does not exist" 1>&2)
 				exit 1
 			fi
 			export REFA=$REF.fasta
@@ -68,7 +69,7 @@ do
 			(echo "output $OUTPUT_DIR" 1>&2)
 			;;
 		?)
-			echo "FAILURE: $0 ${OPTION} ${OPTARG} is not valid!"
+			(echo "FAILURE: $0 ${OPTION} ${OPTARG} is not valid!" 1>&2)
 			usage
 			exit 1
 			;;
@@ -76,7 +77,7 @@ do
 done
 
 if [ "${#FILE_LIST[@]}" -lt "1" ] || [ "${OUTPUT}" == "" ]; then
-	echo "FAIL: Missing required parameter!"
+	(echo "FAIL: Missing required parameter!" 1>&2)
 	usage
 	exit 1
 fi
@@ -85,7 +86,7 @@ IDN=$(echo $SLURM_JOB_NAME | cut -d'_' -f2)
 
 HEADER="CV"
 
-echo $HEADER $FILES "->" $OUTPUT
+(echo $HEADER $FILES "->" $OUTPUT 1>&2)
 
 mergeList=""
 for INPUT in ${FILE_LIST[@]}; do
@@ -107,14 +108,14 @@ GATK_ARGS="${GATK_PROC} \
 
 if [ -z $GATK_JAR ]
 then
-	echo "Loading GATK Module"
+	(echo "Loading GATK Module" 1>&2)
 	module load GATK
 	GATK_JAR=$EBROOTGATK/GenomeAnalysisTK.jar
 
 fi
 
 CMD="srun $(which java) ${JAVA_ARGS} -cp $GATK_JAR ${GATK_ARGS} ${mergeList} -out ${SCRATCH_DIR}/${OUTPUT}"
-echo "$HEADER ${CMD}" | tee -a commands.txt
+(echo "$HEADER ${CMD}" | tee -a commands.txt 1>&2)
 
 JOBSTEP=0
 

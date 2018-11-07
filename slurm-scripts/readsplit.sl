@@ -7,7 +7,8 @@
 #SBATCH --error		slurm/RS_%A_%a.out
 #SBATCH --output	slurm/RS_%A_%a.out
 
-echo "$(date) on $(hostname)"
+(echo "$(date) on $(hostname)" 1>&2)
+(echo $0 $* 1>&2)
 
 if [ -e $EXEDIR/baserefs.sh ]
 then
@@ -18,7 +19,7 @@ fi
 
 
 function usage {
-echo -e "\
+(echo -e "\
 *************************************
 * This script will align FastQ files*
 * Sorts them and splits by Contig   *
@@ -45,7 +46,7 @@ echo -e "\
 *                  ${ylw}merge all partial samples for individual.${nrm}
 *   -p [PLATFORM]  Capture platform/Exome chip.
 *                  List of .bed files is at \$PLATFORMS: ${PLATFORMS}/
-*********************************"
+*********************************" 1>&2)
 }
 
 while getopts "i:s:d:b:mo:p:" OPTION
@@ -54,7 +55,7 @@ do
 	case $OPTION in
 		i)
 			if [ ! -e ${OPTARG} ]; then
-				echo "FAIL: Input file $OPTARG does not exist!"
+				(echo "FAIL: Input file $OPTARG does not exist!" 1>&2)
 				exit 1
 			fi
 			if [[ " ${FILE_LIST[@]} " =~ " ${OPTARG} " ]]
@@ -79,14 +80,14 @@ do
 			;;
 		p)
 			if [ ! -e $PLATFORMS/$OPTARG.bed ]; then
-				echo "FAIL: Unable to located $PLATFORMS/$OPTARG.bed!"
+				(echo "FAIL: Unable to located $PLATFORMS/$OPTARG.bed!" 1>&2)
 				exit 1
 			fi
 			export PLATFORM=${OPTARG}
 			(printf "%-22s%s (%s)\n" "Platform" $PLATFORM $(find $PLATFORMS/ -type f -iname "$PLATFORM.bed") 1>&2)
 			;;
 		*)
-			echo "FAILURE: $0 ${OPTION} ${OPTARG} is not valid!"
+			(echo "FAILURE: $0 ${OPTION} ${OPTARG} is not valid!" 1>&2)
 			usage
 			exit 1
 			;;
@@ -94,7 +95,7 @@ do
 done
 
 if [ "${#FILE_LIST[@]}" -lt "1" ] || [ "${SAMPLE}" == "" ]; then
-	echo "FAIL: Missing required parameter!"
+	(echo "FAIL: Missing required parameter!" 1>&2)
 	usage
 	exit 1
 fi
@@ -112,7 +113,7 @@ INPUT=${FILE_LIST[$(($READNUM - 1))]}
 
 HEADER="RS"
 
-echo "$HEADER: R${READNUM} ${INPUT}"
+(echo "$HEADER: R${READNUM} ${INPUT}" 1>&2)
 
 # Make sure input exists!
 if ! inFile; then exit $EXIT_IO; fi
@@ -293,12 +294,12 @@ function splitByRead {
 	fi
 }
 
-echo "$HEADER: Zip command: ${ZIP_CMD}"
-echo "$HEADER: Cat command: ${CAT_CMD}"
+(echo "$HEADER: Zip command: ${ZIP_CMD}" 1>&2)
+(echo "$HEADER: Cat command: ${CAT_CMD}" 1>&2)
 
 bestIndex=$(getBestIndex)
 
-echo "$HEADER: Best index is [${bestIndex}]"
+(echo "$HEADER: Best index is [${bestIndex}]" 1>&2)
 
 mkdir -p blocks
 
@@ -314,9 +315,9 @@ fi
 touch ${SAMPLE}_R${READNUM}_split.done
 
 if [ ! -e ${SAMPLE}_R${PAIRNUM}_split.done ]; then
-	echo "Paired read not completed!"
+	(echo "Paired read not completed!" 1>&2)
 else
-	echo "Paired read done!"
+	(echo "Paired read done!" 1>&2)
 	if ! ${PBIN}/spool_sample.sh -e BA -s $SAMPLE -p $PLATFORM $MULTI_RUN -t $FINAL_TYPE; then
 		cmdFailed $?
 		exit $EXIT_PR

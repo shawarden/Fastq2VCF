@@ -7,7 +7,8 @@
 #SBATCH --error		slurm/RC_%A_%a.out
 #SBATCH --output	slurm/RC_%A_%a.out
 
-echo "$(date) on $(hostname)"
+(echo "$(date) on $(hostname)" 1>&2)
+(echo $0 $* 1>&2)
 
 if [ -e $EXEDIR/baserefs.sh ]
 then
@@ -17,7 +18,7 @@ else
 fi
 
 function usage {
-echo -e "\
+(echo -e "\
 *************************************
 * This script spool up an alignment *
 * run for the specified patient ID  *
@@ -38,7 +39,7 @@ echo -e "\
 *   -r [FILE]      Full path to reference file.
 *                  Default: \$REF_CORE ($REF_CORE)
 *
-*********************************"
+*********************************" 1>&2)
 }
 
 while getopts "hi:o:r:" OPTION
@@ -94,7 +95,7 @@ OUTPUT=printreads/${CONTIG}.bam
 
 HEADER="RC"
 
-echo "$HEADER: ${INPUT} -> BQSR -> ${OUTPUT}"
+(echo "$HEADER: ${INPUT} -> BQSR -> ${OUTPUT}" 1>&2)
 
 
 # Make sure input and target folders exists and that output file does not!
@@ -104,7 +105,7 @@ if ! outFile; then exit $EXIT_IO; fi
 
 INPUT_BAI=${INPUT%.*}.bai
 if [ ! -e $INPUT_BAI ]; then
-	echo "WARN: $INPUT_BAI does not exist. Creating..."
+	(echo "WARN: $INPUT_BAI does not exist. Creating..." 1>&2)
 	module load SAMtools
 	scontrol update jobid=${SLURM_ARRAY_JOB_ID}_${SLURM_ARRAY_TASK_ID} name=${IDN}_Indexing_BAM_${CONTIG}_$SLURM_ARRAY_TASK_ID
 	samtools index $INPUT $INPUT_BAI
@@ -112,7 +113,7 @@ fi
 
 if [ -z $GATK_JAR ]
 then
-	echo "Loading GATK Module"
+	(echo "Loading GATK Module" 1>&2)
 	module load GATK
 	GATK_JAR=$EBROOTGATK/GenomeAnalysisTK.jar
 fi
@@ -120,7 +121,7 @@ fi
 HEADER="BR"
 
 CMD="srun $(which java) ${JAVA_ARGS} -jar $GATK_JAR ${GATK_BSQR} -L ${CONTIG} ${GATK_ARGS} -I ${INPUT} -o ${JOB_TEMP_DIR}/${BQSR}"
-echo "$HEADER: ${CMD}" | tee -a commands.txt
+(echo "$HEADER: ${CMD}" | tee -a commands.txt 1>&2)
 
 JOBSTEP=0
  
@@ -137,7 +138,7 @@ SECONDS=0
 HEADER="PR"
 
 CMD="srun $(which java) ${JAVA_ARGS} -jar $GATK_JAR ${GATK_READ} -L ${CONTIG} ${GATK_ARGS} -I ${INPUT} -BQSR ${JOB_TEMP_DIR}/${BQSR} -o ${OUTPUT}"
-echo "$HEADER: ${CMD}" | tee -a commands.txt
+(echo "$HEADER: ${CMD}" | tee -a commands.txt 1>&2)
 
 JOBSTEP=1
 

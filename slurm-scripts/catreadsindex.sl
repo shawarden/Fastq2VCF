@@ -6,7 +6,8 @@
 #SBATCH --error		slurm/RI_%j.out
 #SBATCH --output	slurm/RI_%j.out
 
-echo "$(date) on $(hostname)"
+(echo "$(date) on $(hostname)" 1>&2)
+(echo $0 $* 1>&2)
 
 if [ -e $EXEDIR/baserefs.sh ]
 then
@@ -16,7 +17,7 @@ else
 fi
 
 function usage {
-echo -e "\
+(echo -e "\
 *******************************************
 * This script will index a given BAM file *
 *******************************************
@@ -30,7 +31,7 @@ echo -e "\
 * Optional:
 *   -o [FILE]      Output file.
 *
-*********************************"
+*********************************" 1>&2)
 }
 
 while getopts "i:o:" OPTION
@@ -39,7 +40,7 @@ do
 	case $OPTION in
 		i)
 			if [ ! -f ${OPTARG} ]; then
-				echo "FAIL: Input file $OPTARG does not exist!"
+				(echo "FAIL: Input file $OPTARG does not exist!" 1>&2)
 				exit 1
 			fi
 			if [[ " ${FILE_LIST[@]} " =~ " ${OPTARG} " ]]
@@ -55,7 +56,7 @@ do
 			(echo "INFO: output file \"$OUTPUT\"" 1>&2)
 			;;
 		?)
-			echo "FAIL: $0 ${OPTION} ${OPTARG} is not valid!"
+			(echo "FAIL: $0 ${OPTION} ${OPTARG} is not valid!" 1>&2)
 			usage
 			exit 1
 			;;
@@ -89,7 +90,7 @@ if ! outFile; then exit $EXIT_IO; fi
 module load SAMtools
 
 CMD="srun $(which samtools) index ${INPUT} ${JOB_TEMP_DIR}/${OUTPUT}"
-echo "$HEADER: ${CMD}" | tee -a commands.txt
+(echo "$HEADER: ${CMD}" | tee -a commands.txt 1>&2)
 
 JOBSTEP=0
 

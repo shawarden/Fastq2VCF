@@ -6,7 +6,8 @@
 #SBATCH --error		slurm/CR_%j.out
 #SBATCH --output	slurm/CR_%j.out
 
-echo "$(date) on $(hostname)"
+(echo "$(date) on $(hostname)" 1>&2)
+(echo $0 $* 1>&2)
 
 if [ -e $EXEDIR/baserefs.sh ]
 then
@@ -16,7 +17,7 @@ else
 fi
 
 function usage {
-echo -e "\
+(echo -e "\
 ****************************************
 * This script will concatonate multple *
 * BAM files into a single BAM using    *
@@ -34,7 +35,7 @@ echo -e "\
 *   -r [FILE]      Full path to reference file.
 *                  Default: \$REF_CORE ($REF_CORE)
 *
-*********************************"
+*********************************" 1>&2)
 }
 
 while getopts "i:r:o:" OPTION
@@ -43,7 +44,7 @@ do
 	case $OPTION in
 		i)
 			if [ ! -e ${OPTARG} ]; then
-				echo "FAIL: Input file $OPTARG does not exist!"
+				(echo "FAIL: Input file $OPTARG does not exist!" 1>&2)
 				exit 1
 			fi
 			if [[ " ${FILE_LIST[@]} " =~ " ${OPTARG} " ]]
@@ -57,18 +58,18 @@ do
 		r)
 			export REF=${OPTARG}
 			if [ ! -e $REF ]; then
-				echo "FAIL: $REF does not exist"
+				(echo "FAIL: $REF does not exist" 1>&2)
 				exit 1
 			fi
 			export REFA=$REF.fasta
-			( echo "reference $REF" 1>&2)
+			(echo "reference $REF" 1>&2)
 			;;
 		o)
 			export OUTPUT=${OPTARG}
 			(echo "output $OUTPUT_DIR" 1>&2)
 			;;
 		?)
-			echo "FAILURE: $0 ${OPTION} ${OPTARG} is not valid!"
+			(echo "FAILURE: $0 ${OPTION} ${OPTARG} is not valid!" 1>&2)
 			usage
 			exit 1
 			;;
@@ -76,7 +77,7 @@ do
 done
 
 if [ "${#FILE_LIST[@]}" -lt "1" ] || [ "${OUTPUT}" == "" ]; then
-	echo "FAIL: Missing required parameter!"
+	(echo "FAIL: Missing required parameter!" 1>&2)
 	usage
 	exit 1
 fi
@@ -94,17 +95,17 @@ DF_SCRATCH=$(echo "$DF_OUT" | grep " /scratch" | awk '{printf "%.0f", $4/1024/10
 
 # If node's temp folder has enough space, write output locally, otherwise leave at main destination.
 if [ "$DF_TMP" -gt "250" ]; then
-	echo "$HEADER: Writing to local node /tmp folder. $DF_TMP"
+	(echo "$HEADER: Writing to local node /tmp folder. $DF_TMP" 1>&2)
 	OUTDIR=$JOB_TEMP_DIR
 elif [ "$DF_SCRATCH" -gt "250" ]; then
-	echo "$HEADER: Not enough space on local node. Writing to scratch. $DF_SCRATCH"
+	(echo "$HEADER: Not enough space on local node. Writing to scratch. $DF_SCRATCH" 1>&2)
 	OUTDIR=$SCRATCH_DIR
 else
-	echo "$HEADER: No enough space on local node or scratch disk for write. Writing to final destination."
+	(echo "$HEADER: No enough space on local node or scratch disk for write. Writing to final destination." 1>&2)
 	df -h
 fi
 
-echo "$HEADER: ${FILE_LIST[@]} + Header($BAMHEAD) ->" $OUTPUT
+(echo "$HEADER: ${FILE_LIST[@]} + Header($BAMHEAD) ->" $OUTPUT 1>&2)
 
 for INPUT in ${FILE_LIST[@]}; do
 	if ! inFile; then exit $EXIT_IO; fi
@@ -116,7 +117,7 @@ if ! outFile; then exit $EXIT_IO; fi
 module load SAMtools
 
 CMD="srun $(which samtools) cat -h ${BAMHEAD} -o ${OUTDIR}/${OUTPUT} ${FILE_LIST[@]}"
-echo "$HEADER: ${CMD}" | tee -a commands.txt
+(echo "$HEADER: ${CMD}" | tee -a commands.txt 1>&2)
 
 JOBSTEP=0
 

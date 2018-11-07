@@ -7,7 +7,8 @@
 #SBATCH --error		slurm/MM_%A_%a.out
 #SBATCH --output	slurm/MM_%A_%a.out
 
-echo "$(date) on $(hostname)"
+(echo "$(date) on $(hostname)" 1>&2)
+(echo $0 $* 1>&2)
 
 if [ -e $EXEDIR/baserefs.sh ]
 then
@@ -18,7 +19,7 @@ fi
 
 
 function usage {
-echo -e "\
+(echo -e "\
 *************************************
 * This script will merge BAM files  *
 * and mark duplicate entries        *
@@ -41,7 +42,7 @@ echo -e "\
 *                  Path to final output location.
 *                  Defaults to /scratch/\$USER (/scratch/$USER)
 *
-*********************************"
+*********************************" 1>&2)
 }
 
 while getopts "s:i:r:o:" OPTION
@@ -83,7 +84,7 @@ OUTPUT=markdup/${CONTIG}.bam
 
 HEADER="MM"
 
-echo "$HEADER: ${CONTIG} -> merged -> ${OUTPUT}"
+(echo "$HEADER: ${CONTIG} -> merged -> ${OUTPUT}" 1>&2)
 
 
 # Blocks do not need to be sequential do they?
@@ -93,14 +94,14 @@ contigMerBlocks=$(find . -type f -iwholename "*/split/*/${CONTIG}.bam"; find . -
 
 numcontigMerBlocks=$(echo "$contigMerBlocks" | wc -l)
 
-echo "$contigMerBlocks"
+(echo "$contigMerBlocks" 1>&2)
 
 if [ $numcontigMerBlocks -eq 0 ]; then
-	echo "$HEADER: Merge contig ${CONTIG} contains $numcontigMerBlocks files!"
+	(echo "$HEADER: Merge contig ${CONTIG} contains $numcontigMerBlocks files!" 1>&2)
 #	scriptFailed
 	exit $EXIT_IO
 else
-	echo $HEADER: Merge contig ${CONTIG} will run $numcontigMerBlocks files: \"${contigMerBlocks}\"
+	(echo $HEADER: Merge contig ${CONTIG} will run $numcontigMerBlocks files: \"${contigMerBlocks}\" 1>&2)
 fi
 
 mergeList=""
@@ -113,7 +114,7 @@ for INPUT in ${contigMerBlocks}; do
 done
 
 if [ "$mergeList" == "" ]; then
-	echo "$HEADER: No inputs defined!"
+	(echo "$HEADER: No inputs defined!" 1>&2)
 	exit $EXIT_IO
 fi
 
@@ -139,7 +140,7 @@ SECONDS=0
 HEADER="MD"
 CMD="srun $(which java) ${JAVA_ARGS} -jar $EBROOTPICARD/picard.jar MarkDuplicates ${PIC_ARGS} ${MARK_ARGS} ${mergeList} OUTPUT=${OUTPUT}" 
 #CMD="srun $(which java) ${JAVA_ARGS} -jar $EBROOTPICARD/picard.jar MarkDuplicates ${PIC_ARGS} ${MARK_ARGS} INPUT=${MERGED} OUTPUT=${OUTPUT}" 
-echo "$HEADER: ${CMD}" | tee -a commands.txt
+(echo "$HEADER: ${CMD}" | tee -a commands.txt 1>&2)
 
 #JOBSTEP=1
 

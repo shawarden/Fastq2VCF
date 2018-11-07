@@ -7,8 +7,8 @@
 #SBATCH --error		slurm/BA_%A_%a.out
 #SBATCH --output	slurm/BA_%A_%a.out
 
-echo "$(date) on $(hostname)"
-echo "Path = $PATH"
+(echo "$(date) on $(hostname)" 1>&2)
+(echo $0 $* 1>&2)
 
 export RAMDISK=2
 
@@ -20,7 +20,7 @@ else
 fi
 
 function usage {
-echo -e "\
+(echo -e "\
 *************************************
 * This script will align FastQ files*
 * Sorts them and splits by Contig   *
@@ -50,7 +50,7 @@ echo -e "\
 *                  Path to final output location.
 *                  Defaults to /scratch/\$USER (/scratch/$USER)
 *
-*********************************"
+*********************************" 1>&2)
 }
 
 while getopts "s:i:r:o:m" OPTION
@@ -100,7 +100,7 @@ do
 done
 
 if [ "${SAMPLE}" == "" ]; then
-	echo "FAIL: Missing required parameter!"
+	(echo "FAIL: Missing required parameter!" 1>&2)
 	usage
 	exit 1
 fi
@@ -125,12 +125,12 @@ fi
 
 READGROUP=$($CAT_CMD $READ1 | head -1 | awk -F'[@:]' '{print $2"_"$3"_"$4"_"$5"_"$11}' )
 
-echo "$HEADER: $READGROUP $BLOCK $READ1 $READ2 -> $OUTPUT"
+(echo "$HEADER: $READGROUP $BLOCK $READ1 $READ2 -> $OUTPUT" 1>&2)
 jobStats
 
 
 if [ $(echo "$READGROUP" | wc -w) -gt 1 ]; then
-	echo "$HEADER: Too many read-groups!"
+	(echo "$HEADER: Too many read-groups!" 1>&2)
 	exit 1
 fi
 
@@ -158,18 +158,14 @@ if [ ! -e sorted/${BLOCK}.done ]; then
 	
 	HEADER="PA"
 	JOBSTEP=0
-	echo "$HEADER: Aligning! $BWA_REF"
-	
-	echo "Path = $PATH"
-	
+	(echo "$HEADER: Aligning! $BWA_REF" 1>&2)
+		
 	module load BWA
 	module load SAMtools
 	
 	# Pipe output from alignment into sortsam
 	CMD="srun $(which bwa) mem -M -t ${SLURM_JOB_CPUS_PER_NODE} -R @RG'\t'$RG_ID'\t'$RG_PL'\t'$RG_PU'\t'$RG_LB'\t'$RG_SM $BWA_REF $READ1 $READ2 | $(which samtools) view -bh - > $SHM_DIR/align_${BLOCK}.bam"
-	echo "$HEADER: ${CMD}" | tee -a ../commands.txt
-	
-	echo "Path = $PATH"
+	(echo "$HEADER: ${CMD}" | tee -a ../commands.txt 1>&2)
 	
 	scontrol update jobid=${SLURM_ARRAY_JOB_ID}_${SLURM_ARRAY_TASK_ID} name=${SAMPLE}_Aligning_${BLOCK}
 	
@@ -189,7 +185,7 @@ if [ ! -e sorted/${BLOCK}.done ]; then
 	module load picard
 	
 	CMD="srun $(which java) ${JAVA_ARGS} -jar $EBROOTPICARD/picard.jar SortSam ${PIC_ARGS} ${SORT_ARGS} INPUT=$SHM_DIR/align_${BLOCK}.bam OUTPUT=$SHM_DIR/sorted_${BLOCK}.bam"
-	echo "$HEADER: ${CMD}" | tee -a ../commands.txt
+	(echo "$HEADER: ${CMD}" | tee -a ../commands.txt 1>&2)
 	
 	scontrol update jobid=${SLURM_ARRAY_JOB_ID}_${SLURM_ARRAY_TASK_ID} name=${SAMPLE}_Sorting_${BLOCK}
 	
@@ -200,16 +196,16 @@ if [ ! -e sorted/${BLOCK}.done ]; then
 	
 	storeMetrics
 	
-	rm $SHM_DIR/align_${BLOCK}.bam && echo "$HEADER: Purged aligned block: $SHM_DIR/align_${BLOCK}.bam"
+	rm $SHM_DIR/align_${BLOCK}.bam && (echo "$HEADER: Purged aligned block: $SHM_DIR/align_${BLOCK}.bam" 1>&2)
 else
-	echo "$HEADER: Alignment already completed!"
+	(echo "$HEADER: Alignment already completed!" 1>&2)
 	SS_SECONDS=$SECONDS
 	SECONDS=0
 fi
 
 HEADER="CS"
 JOBSTEP=2
-echo "$HEADER: Splitting by contig"
+(echo "$HEADER: Splitting by contig" 1>&2)
 
 module load SAMtools
 
@@ -220,9 +216,9 @@ if ! for contig in ${CONTIGARRAY[@]}; do echo $contig; done | (
 	srun xargs -I{} --max-procs ${SLURM_JOB_CPUS_PER_NODE} bash -c '{
 		OUTPUT="split/${BLOCK}/{}.bam"
 		CMD="$(which samtools) view -bh -o ${OUTPUT} $SHM_DIR/sorted_${BLOCK}.bam {}"
-		echo "$HEADER: ${CMD}" | tee -a ../commands.txt
+		(echo "$HEADER: ${CMD}" | tee -a ../commands.txt 1>&2)
 		${CMD}
-		echo "result: $?"
+		(echo "result: $?" 1>&2)
 	}'
 ); then
 	cmdFailed $?
@@ -234,11 +230,11 @@ JOBSTEP=""
 SECONDS=$(($SECONDS + $SS_SECONDS + $PA_SECONDS))
 
 df -ah $SHM_DIR
-rm $SHM_DIR/sorted_${BLOCK}.bam && echo "$HEADER: Purged sorted block: $SHM_DIR/sorted_${BLOCK}.bam"
+rm $SHM_DIR/sorted_${BLOCK}.bam && (echo "$HEADER: Purged sorted block: $SHM_DIR/sorted_${BLOCK}.bam" 1>&2)
 
 # Remove input files.
 if [ "${#FILE_LIST[@]}" -lt "1" ]; then 
-	rm ${READ1} ${READ2} && echo "$HEADER: Purged source read block files!"
+	rm ${READ1} ${READ2} && (echo "$HEADER: Purged source read block files!" 1>&2)
 fi
 
 # Indicate completion.

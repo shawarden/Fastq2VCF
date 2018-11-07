@@ -6,7 +6,8 @@
 #SBATCH --error		slurm/GD_%j.out
 #SBATCH --output	slurm/GD_%j.out
 
-echo "$(date) on $(hostname)"
+(echo "$(date) on $(hostname)" 1>&2)
+(echo $0 $* 1>&2)
 
 if [ -e $EXEDIR/baserefs.sh ]
 then
@@ -17,7 +18,7 @@ fi
 
 
 function usage {
-echo -e "\
+(echo -e "\
 *************************************
 * This script spool up an alignment *
 * run for the specified patient ID  *
@@ -50,7 +51,7 @@ echo -e "\
 *                  If only an ID is given, multiple-runs cannot be processed.
 *
 *
-*********************************"
+*********************************" 1>&2)
 }
 
 while getopts "p:c:g:hi:r:s:" OPTION
@@ -93,7 +94,7 @@ do
 			;;
 		p)
 			if [ ! -e $PLATFORMS/$OPTARG.bed ]; then
-				echo "#FAIL: Unable to located $PLATFORMS/$OPTARG.bed!"
+				(echo "#FAIL: Unable to located $PLATFORMS/$OPTARG.bed!" 1>&2)
 				exit 1
 			fi
 			export PLATFORM=${OPTARG}
@@ -113,7 +114,7 @@ do
 			(printf "%-22s%s\n" "#Sample ID" $SAMPLE 1>&2)
 			;;
 		?)
-			echo "FAILURE: ${OPTION} ${OPTARG} is not valid!"
+			(echo "FAILURE: ${OPTION} ${OPTARG} is not valid!" 1>&2)
 			usage
 			exit 1
 			;;

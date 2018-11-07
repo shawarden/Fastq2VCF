@@ -7,8 +7,8 @@
 #SBATCH --error		slurm/DC_%A_%a.out
 #SBATCH --output	slurm/DC_%A_%a.out
 
-echo "$(date) on $(hostname)"
-echo "$0 $*"
+(echo "$(date) on $(hostname)" 1>&2)
+(echo $0 $* 1>&2)
 
 if [ -e $EXEDIR/baserefs.sh ]
 then
@@ -19,7 +19,7 @@ fi
 
 
 function usage {
-echo -e "\
+(echo -e "\
 *************************************
 * This script spool up an alignment *
 * run for the specified patient ID  *
@@ -44,7 +44,7 @@ echo -e "\
 *   -r [FILE]      Full path to reference file.
 *                  Default: \$REF_CORE ($REF_CORE)
 *
-*********************************"
+*********************************" 1>&2)
 }
 
 while getopts "p:s:b:c:e:f:g:i:hmo:r:" OPTION
@@ -120,7 +120,7 @@ fi
 OUTPUT=depth/${CONTIG}
 
 HEADER="DC"
-echo "$HEADER: ${inputList} + ${PLATFORM} -> ${OUTPUT}"
+(echo "$HEADER: ${inputList} + ${PLATFORM} -> ${OUTPUT}" 1>&2)
 
 # Make sure input and target folders exists and that output file does not!
 if ! outFile; then exit $EXIT_IO; fi
@@ -156,14 +156,14 @@ GATK_ARGS="-T ${GATK_PROC} \
 
 if [ -z $GATK_JAR ]
 then
-	echo "Loading GATK Module"
+	(echo "Loading GATK Module" 1>&2)
 	module load GATK
 	GATK_JAR=$EBROOTGATK/GenomeAnalysisTK.jar
 
 fi
 
 CMD="srun $(which java) ${JAVA_ARGS} -jar $GATK_JAR ${GATK_ARGS} ${inputList} -o ${OUTPUT}"
-echo "$HEADER: ${CMD}" | tee -a commands.txt
+(echo "$HEADER: ${CMD}" | tee -a commands.txt 1>&2)
 
 JOBSTEP=0
 

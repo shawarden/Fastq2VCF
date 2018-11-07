@@ -10,7 +10,7 @@ export EXEDIR=$(dirname $0)
 source $EXEDIR/baserefs.sh
 
 function usage {
-echo -e "\
+(echo -e "\
 *************************************
 * This script spool up an alignment *
 * run for the specified patient ID  *
@@ -71,7 +71,7 @@ $(for file in ${PLATFORMS}/*.bed; do platFile=$(basename $file); platName=${plat
 *   -t [EXT]       Final output type: g.vcf, vcf. Will always end in .gz
 *                  Default: g.vcf
 *
-*********************************"
+*********************************" 1>&2)
 }
 
 while getopts "hb:c:e:f:g:i:mo:p:r:s:t:" OPTION

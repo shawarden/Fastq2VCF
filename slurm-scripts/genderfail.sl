@@ -7,6 +7,7 @@
 #SBATCH --output	slurm/GF_%j.out
 #SBATCH --mail-type	FAIL
 
-echo "$(date) on $(hostname)"
-echo "Something about the gender failed: $SLURM_JOB_NAME"
+(echo "$(date) on $(hostname)" 1>&2)
+(echo $0 $* 1>&2)
+(echo "Something about the gender failed: $SLURM_JOB_NAME" 1>&2)
 exit 1

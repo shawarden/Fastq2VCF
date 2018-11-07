@@ -7,8 +7,8 @@
 #SBATCH --error		slurm/HC_%A_%a.out
 #SBATCH --output	slurm/HC_%A_%a.out
 
-echo "$(date) on $(hostname)"
-echo "$0 $*"
+(echo "$(date) on $(hostname)" 1>&2)
+(echo $0 $* 1>&2)
 
 if [ -e $EXEDIR/baserefs.sh ]
 then
@@ -19,7 +19,7 @@ fi
 
 
 function usage {
-echo -e "\
+(echo -e "\
 *************************************
 * This script spool up an alignment *
 * run for the specified patient ID  *
@@ -45,7 +45,7 @@ echo -e "\
 *   -r [FILE]      Full path to reference file.
 *                  Default: \$REF_CORE ($REF_CORE)
 *
-*********************************"
+*********************************" 1>&2)
 }
 
 ENTRY_POINT=RS
@@ -156,11 +156,11 @@ if ! outFile; then exit $EXIT_IO; fi
 
 INPUT_BAI=${INPUT%.*}.bai
 if [ ! -e $INPUT_BAI ]; then
-	echo "WARN: $INPUT_BAI does not exist. Indexing..."
+	(echo "WARN: $INPUT_BAI does not exist. Indexing..." 1>&2)
 	module load SAMtools
 	scontrol update jobid=${SLURM_ARRAY_JOB_ID}_${SLURM_ARRAY_TASK_ID} name=${IDN}_Indexing_BAM_${CONTIG}_$SLURM_ARRAY_TASK_ID
 	if ! samtools index $INPUT $INPUT_BAI; then
-		echo "FAIL: Unable to index $INPUT"
+		(echo "FAIL: Unable to index $INPUT" 1>&2)
 		exit $EXIT_PR
 	fi
 fi
@@ -178,14 +178,14 @@ GATK_ARGS="-T ${GATK_PROC} \
 
 if [ -z $GATK_JAR ]
 then
-	echo "Loading GATK Module"
+	(echo "Loading GATK Module" 1>&2)
 	module load GATK
 	GATK_JAR=$EBROOTGATK/GenomeAnalysisTK.jar
 
 fi
 
 CMD="srun $(which java) ${JAVA_ARGS} -jar $GATK_JAR ${GATK_ARGS} ${inputList} -o ${JOB_TEMP_DIR}/${OUTPUT}"
-echo "$HEADER ${CMD}" | tee -a commands.txt
+(echo "$HEADER ${CMD}" | tee -a commands.txt 1>&2)
 
 JOBSTEP=0
 
