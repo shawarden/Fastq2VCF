@@ -485,7 +485,7 @@ case $ENTRY_POINT in
 		
 		(printf "%-22s" "Index Reads" 1>&2)
 		
-		if [ ! -e ${SAMPLE_PATH}/${catReadsOutput%.bam}.bai.done ]; then
+		if [ ! -e ${catReadsOutput%.bam}.bai.done ]; then
 			DEP_RI=$(sbatch $(dispatch "RI") -J RI_${IDN} $(depCheck $DEP_CR) $SLSBIN/catreadsindex.sl -i $catReadsOutput -o ${catReadsOutput%.bam}.bai | awk '{print $4}')
 			if [ $? -ne 0 ] || [ "$DEP_RI" == "" ]; then
 				(printf "FAILED!\n" 1>&2)
