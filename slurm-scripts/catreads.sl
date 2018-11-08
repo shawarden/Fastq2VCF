@@ -96,16 +96,16 @@ HEADER="CR"
 
 # Get local node freespace for /tmp and /scratch
 DF_OUT=$(df)
-DF_TMP=$(echo "$DF_OUT" | grep " /tmp" | awk '{printf "%.0f", $4/1024/1024}')
-DF_SCRATCH=$(echo "$DF_OUT" | grep " /scratch" | awk '{printf "%.0f", $4/1024/1024}')
+DF_TMP=$(echo "$DF_OUT" | grep " /tmp")
+DF_SCRATCH=$(echo "$DF_OUT" | grep "$(echo $SCRATCH | cut -d "/" -f2)")
 
-echo "Good"
+echo "$DF_TMP, $DF_SCRATCH, 262144000"
 
 # If node's temp folder has enough space, write output locally, otherwise leave at main destination.
-if [ "$DF_TMP" -gt "250" ]; then
+if [ "$DF_TMP" -gt "262144000" ]; then
 	(echo "$HEADER: Writing to local node /tmp folder. $DF_TMP" 1>&2)
 	OUTDIR=$JOB_TEMP_DIR
-elif [ "$DF_SCRATCH" -gt "250" ]; then
+elif [ "$DF_SCRATCH" -gt "262144000" ]; then
 	(echo "$HEADER: Not enough space on local node. Writing to scratch. $DF_SCRATCH" 1>&2)
 	OUTDIR=$SCRATCH_DIR
 else
