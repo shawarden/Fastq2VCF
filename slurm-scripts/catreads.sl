@@ -66,7 +66,7 @@ do
 			;;
 		o)
 			export OUTPUT=${OPTARG}
-			(echo "output $OUTPUT_DIR" 1>&2)
+			(echo "output $OUTPUT" 1>&2)
 			;;
 		?)
 			(echo "FAILURE: $0 ${OPTION} ${OPTARG} is not valid!" 1>&2)
