@@ -84,7 +84,11 @@ if [ "${#FILE_LIST[@]}" -lt "1" ] || [ "${OUTPUT}" == "" ]; then
 	exit 1
 fi
 
+echo "yup"
+
 IDN=$(echo $SLURM_JOB_NAME | cut -d'_' -f2)
+
+echo "now"
 
 BAMHEAD=${FILE_LIST[0]}
 
@@ -94,6 +98,8 @@ HEADER="CR"
 DF_OUT=$(df)
 DF_TMP=$(echo "$DF_OUT" | grep " /tmp" | awk '{printf "%.0f", $4/1024/1024}')
 DF_SCRATCH=$(echo "$DF_OUT" | grep " /scratch" | awk '{printf "%.0f", $4/1024/1024}')
+
+echo "Good"
 
 # If node's temp folder has enough space, write output locally, otherwise leave at main destination.
 if [ "$DF_TMP" -gt "250" ]; then
@@ -106,6 +112,8 @@ else
 	(echo "$HEADER: No enough space on local node or scratch disk for write. Writing to final destination." 1>&2)
 	df -h
 fi
+
+echo "why?"
 
 (echo "$HEADER: ${FILE_LIST[@]} + Header($BAMHEAD) ->" $OUTPUT 1>&2)
 
