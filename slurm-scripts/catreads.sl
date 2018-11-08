@@ -76,6 +76,8 @@ do
 	esac
 done
 
+echo "what?"
+
 if [ "${#FILE_LIST[@]}" -lt "1" ] || [ "${OUTPUT}" == "" ]; then
 	(echo "FAIL: Missing required parameter!" 1>&2)
 	usage
