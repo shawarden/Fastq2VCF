@@ -1,4 +1,4 @@
-#!/bin/bash -e
+#!/bin/bash
 #SBATCH --job-name	DepthOfCoverage
 #SBATCH --time		0-00:30:00
 #SBATCH --mem		8G

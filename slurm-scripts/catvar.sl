@@ -1,4 +1,4 @@
-#!/bin/bash -e
+#!/bin/bash
 #SBATCH --job-name	CatVariants
 #SBATCH --time		359
 #SBATCH --mem		16G
@@ -66,7 +66,7 @@ do
 			;;
 		o)
 			export OUTPUT=${OPTARG}
-			(echo "output $OUTPUT_DIR" 1>&2)
+			(echo "output $OUTPUT" 1>&2)
 			;;
 		?)
 			(echo "FAILURE: $0 ${OPTION} ${OPTARG} is not valid!" 1>&2)
@@ -114,7 +114,7 @@ then
 
 fi
 
-CMD="srun $(which java) ${JAVA_ARGS} -cp $GATK_JAR ${GATK_ARGS} ${mergeList} -out ${SCRATCH_DIR}/${OUTPUT}"
+CMD="srun $(which java) ${JAVA_ARGS} -cp $GATK_JAR ${GATK_ARGS} ${mergeList} -out {OUTPUT}"
 (echo "$HEADER ${CMD}" | tee -a commands.txt 1>&2)
 
 JOBSTEP=0
@@ -128,7 +128,7 @@ fi
 
 
 # Move output to final location
-if ! scratchOut; then exit $EXIT_MV; fi
+#if ! scratchOut; then exit $EXIT_MV; fi
 
 #rm $FILES && echo "$HEADER: Purged input files!"
 

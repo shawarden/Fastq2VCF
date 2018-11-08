@@ -77,19 +77,13 @@ do
 	esac
 done
 
-echo "what?"
-
 if [ "${#FILE_LIST[@]}" -lt "1" ] || [ "${OUTPUT}" == "" ]; then
 	(echo "FAIL: Missing required parameter!" 1>&2)
 	usage
 	exit 1
 fi
 
-echo "yup"
-
 IDN=$(echo $SLURM_JOB_NAME | cut -d'_' -f2)
-
-echo "now"
 
 BAMHEAD=${FILE_LIST[0]}
 
@@ -97,9 +91,8 @@ HEADER="CR"
 
 # Get local node freespace for /tmp and /scratch
 DF_OUT=$(df)
-
-DF_TMP=$(echo "$DF_OUT" | grep " /tmp")
-DF_SCRATCH=$(echo "$DF_OUT" | grep "$(echo $SCRATCH | cut -d "/" -f2)")
+DF_TMP=$(echo "$DF_OUT" | grep " /tmp" | awk '{print $4}')
+DF_SCRATCH=$(echo "$DF_OUT" | grep "$(echo $SCRATCH | cut -d "/" -f2)" | awk '{print $4}')
 
 echo "$DF_TMP, $DF_SCRATCH, 262144000"
 
@@ -114,8 +107,6 @@ else
 	(echo "$HEADER: No enough space on local node or scratch disk for write. Writing to final destination." 1>&2)
 	df -h
 fi
-
-echo "why?"
 
 (echo "$HEADER: ${FILE_LIST[@]} + Header($BAMHEAD) ->" $OUTPUT 1>&2)
 

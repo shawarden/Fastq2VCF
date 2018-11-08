@@ -1,4 +1,4 @@
-#!/bin/bash -e
+#!/bin/bash
 #SBATCH --job-name	GenderFail
 #SBATCH --time		0-00:01:00
 #SBATCH --mem		128

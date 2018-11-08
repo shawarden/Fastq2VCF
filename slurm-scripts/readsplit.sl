@@ -1,4 +1,4 @@
-#!/bin/bash -e
+#!/bin/bash
 #SBATCH --job-name	ReadSplit
 #SBATCH --time		359
 #SBATCH --mem		8G

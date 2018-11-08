@@ -1,4 +1,4 @@
-#!/bin/bash -e
+#!/bin/bash
 #SBATCH --job-name	BlockAlign
 #SBATCH --time		359
 #SBATCH --mem		16G
