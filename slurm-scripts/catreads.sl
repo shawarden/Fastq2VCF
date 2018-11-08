@@ -1,4 +1,5 @@
-#!/bin/bash -e
+#!/bin/bash 
+#-e
 #SBATCH --job-name	CatReads
 #SBATCH --time		60
 #SBATCH --mem		4G
@@ -96,6 +97,7 @@ HEADER="CR"
 
 # Get local node freespace for /tmp and /scratch
 DF_OUT=$(df)
+
 DF_TMP=$(echo "$DF_OUT" | grep " /tmp")
 DF_SCRATCH=$(echo "$DF_OUT" | grep "$(echo $SCRATCH | cut -d "/" -f2)")
 
