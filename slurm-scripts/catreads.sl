@@ -119,7 +119,7 @@ if ! outFile; then exit $EXIT_IO; fi
 
 module load SAMtools
 
-CMD="srun $(which samtools) cat -h ${BAMHEAD} -o ${OUTDIR}/${OUTPUT} ${FILE_LIST[@]}"
+CMD="srun $(which samtools) cat -h ${BAMHEAD} -o ${OUTPUT} ${FILE_LIST[@]}"
 (echo "$HEADER: ${CMD}" | tee -a commands.txt 1>&2)
 
 JOBSTEP=0
