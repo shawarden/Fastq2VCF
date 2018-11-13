@@ -132,10 +132,10 @@ if ! ${CMD}; then
 fi
 
 # Move output to final location
-if [ "$OUTDIR" == "$JOB_TEMP_DIR" ]; then
-	if ! finalOut; then exit $EXIT_MV; fi
-elif [ "$OUTDIR" == "$SCRATCH_DIR" ]; then
-	if ! scratchOut; then exit $EXIT_MV; fi
-fi
+#if [ "$OUTDIR" == "$JOB_TEMP_DIR" ]; then
+#	if ! finalOut; then exit $EXIT_MV; fi
+#elif [ "$OUTDIR" == "$SCRATCH_DIR" ]; then
+#	if ! scratchOut; then exit $EXIT_MV; fi
+#fi
 
 touch ${OUTPUT}.done
