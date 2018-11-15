@@ -90,8 +90,11 @@ CONTIG=${CONTIGBLOCKS[$SLURM_ARRAY_TASK_ID]}
 	INPUT=markdup/${CONTIG}.bam || \
 	INPUT=${FILE_LIST[0]}
 
-  BQSR=bqsr_${CONTIG}.firstpass
-OUTPUT=printreads/${CONTIG}.bam
+  BQSR=${SHM_DIR}/${SLURM_ARRAY_JOB_ID}/bqsr_${CONTIG}.firstpass
+OUTPUT=${SAMPLE_PATH}/printreads/${CONTIG}.bam
+
+mkdir -p $(dir $BQSR)
+mkdir -p $(dir $OUTPUT)
 
 HEADER="RC"
 
@@ -137,7 +140,7 @@ SECONDS=0
 
 HEADER="PR"
 
-CMD="srun $(which java) ${JAVA_ARGS} -jar $GATK_JAR ${GATK_READ} -L ${CONTIG} ${GATK_ARGS} -I ${INPUT} -BQSR ${JOB_TEMP_DIR}/${BQSR} -o ${OUTPUT}"
+CMD="srun $(which java) ${JAVA_ARGS} -jar $GATK_JAR ${GATK_READ} -L ${CONTIG} ${GATK_ARGS} -I ${INPUT} -BQSR ${BQSR} -o ${OUTPUT}"
 (echo "$HEADER: ${CMD}" | tee -a commands.txt 1>&2)
 
 JOBSTEP=1

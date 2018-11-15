@@ -140,7 +140,7 @@ printf "#%-10s %8s %s\n" "Chromosome" "Coverage" "Count" | tee -a ${OUTPUT}
 
 for contig in ${CONTIGBLOCKS[@]}; do
 	if [ "$contig" != "MT" ] && [ "$contig" != "hs37d5" ] && [ "$contig" != "NC_007605" ] && [[ $contig != GL* ]]; then
-		INPUT=depth/${contig}.sample_summary
+		INPUT=${SAMPLE_PATH}/depth/${contig}.sample_summary
 		if [ ! -e ${INPUT} ]; then
 			# Oh crappola!
 			echo "#${contig} file ${INPUT} doesn't exist!" | tee -a ${OUTPUT}

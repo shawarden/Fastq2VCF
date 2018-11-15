@@ -89,7 +89,7 @@ if ! outFile; then exit $EXIT_IO; fi
 
 module load SAMtools
 
-CMD="srun $(which samtools) index ${INPUT} ${JOB_TEMP_DIR}/${OUTPUT}"
+CMD="srun $(which samtools) index ${INPUT} ${OUTPUT}"
 (echo "$HEADER: ${CMD}" | tee -a commands.txt 1>&2)
 
 JOBSTEP=0
@@ -102,7 +102,7 @@ if ! ${CMD}; then
 fi
 
 # Move output to final location
-if ! finalOut; then exit $EXIT_MV; fi
+#if ! finalOut; then exit $EXIT_MV; fi
 
 touch ${OUTPUT}.done
 

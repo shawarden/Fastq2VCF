@@ -266,7 +266,7 @@ NR%'$READCOUNT'==1 {
 		print "Block '$READNUM'x"(i-1)" completed in "(end-start)" seconds!" > "/dev/stderr"
 		start=systime()
 	}
-	x="'${ZIP_CMD}' -c > blocks/R'$READNUM'_"sprintf("%0"'$FASTQ_MAXZPAD'"d", i++)".fastq.gz"
+	x="'${ZIP_CMD}' -c > '$RUN_PATH'/'$SLURM_ARRAY_JOB_ID'/blocks/R'$READNUM'_"sprintf("%0"'$FASTQ_MAXZPAD'"d", i++)".fastq.gz"
 	system("scontrol update jobid='$SLURM_ARRAY_JOB_ID'_'$SLURM_ARRAY_TASK_ID' name='$SAMPLE'_SplitByRead_"(i-1))
 }
 
@@ -305,16 +305,16 @@ mkdir -p blocks
 
 JOBSTEP="batch"
 
-scontrol update jobid=${SLURM_ARRAY_JOB_ID}_${SLURM_ARRAY_TASK_ID} name=${SAMPLE}_SplitByRead
+scontrol update jobid=${SLURM_ARRAY_JOB_ID}_${SLURM_ARRAY_TASK_ID} name=${SAMPLE}_awkByRead
 
 if ! awkByRead; then
 	cmdFailed $?
 	exit $EXIT_PR
 fi
 
-touch ${SAMPLE}_R${READNUM}_split.done
+touch ${RUN_PATH}/${SAMPLE}_R${READNUM}_split.done
 
-if [ ! -e ${SAMPLE}_R${PAIRNUM}_split.done ]; then
+if [ ! -e ${RUN_PATH}/${SAMPLE}_R${PAIRNUM}_split.done ]; then
 	(echo "Paired read not completed!" 1>&2)
 else
 	(echo "Paired read done!" 1>&2)

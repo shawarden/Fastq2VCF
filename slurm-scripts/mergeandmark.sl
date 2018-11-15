@@ -80,7 +80,7 @@ done
 
 CONTIG=${CONTIGBLOCKS[$SLURM_ARRAY_TASK_ID]}
 MERGED=$SHM_DIR/merged.bam
-OUTPUT=markdup/${CONTIG}.bam
+OUTPUT=$SAMPLE_PATH/markdup/${CONTIG}.bam
 
 HEADER="MM"
 

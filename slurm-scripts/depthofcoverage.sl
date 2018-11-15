@@ -117,7 +117,7 @@ else
 	done
 fi
 
-OUTPUT=depth/${CONTIG}
+OUTPUT=${SAMPLE_PATH}/depth/${CONTIG}
 
 HEADER="DC"
 (echo "$HEADER: ${inputList} + ${PLATFORM} -> ${OUTPUT}" 1>&2)

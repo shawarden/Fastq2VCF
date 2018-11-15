@@ -125,7 +125,8 @@ else
 	done
 fi
 
-OUTPUT=haplo/${CONTIG}.${FINAL_TYPE}.gz
+OUTPUT=${SAMPLE_PATH}/haplo/${CONTIG}.${FINAL_TYPE}.gz
+mkdir -p $(dir $OUTPUT)
 
 if [ -e coverage.sh ]; then
 	# Gender file exists so obtain values from it.
@@ -184,7 +185,7 @@ then
 
 fi
 
-CMD="srun $(which java) ${JAVA_ARGS} -jar $GATK_JAR ${GATK_ARGS} ${inputList} -o ${JOB_TEMP_DIR}/${OUTPUT}"
+CMD="srun $(which java) ${JAVA_ARGS} -jar $GATK_JAR ${GATK_ARGS} ${inputList} -o ${OUTPUT}"
 (echo "$HEADER ${CMD}" | tee -a commands.txt 1>&2)
 
 JOBSTEP=0
@@ -197,6 +198,6 @@ fi
 
 
 # Move output to final location
-if ! finalOut; then exit $EXIT_MV; fi
+#if ! finalOut; then exit $EXIT_MV; fi
 
 touch ${OUTPUT}.done

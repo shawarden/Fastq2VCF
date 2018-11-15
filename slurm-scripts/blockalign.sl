@@ -163,8 +163,11 @@ if [ ! -e sorted/${BLOCK}.done ]; then
 	module load BWA
 	module load SAMtools
 	
+	BWA_OUT=$SHM_DIR/$SLURM_ARRAY_JOB_ID/align_${BLOCK}.bam
+	mkdir -p $(dir $BWA_OUT)
+	
 	# Pipe output from alignment into sortsam
-	CMD="srun $(which bwa) mem -M -t ${SLURM_JOB_CPUS_PER_NODE} -R @RG'\t'$RG_ID'\t'$RG_PL'\t'$RG_PU'\t'$RG_LB'\t'$RG_SM $BWA_REF $READ1 $READ2 | $(which samtools) view -bh - > $SHM_DIR/align_${BLOCK}.bam"
+	CMD="srun $(which bwa) mem -M -t ${SLURM_JOB_CPUS_PER_NODE} -R @RG'\t'$RG_ID'\t'$RG_PL'\t'$RG_PU'\t'$RG_LB'\t'$RG_SM $BWA_REF $READ1 $READ2 | $(which samtools) view -bh - > $BWA_OUT"
 	(echo "$HEADER: ${CMD}" | tee -a ../commands.txt 1>&2)
 	
 	scontrol update jobid=${SLURM_ARRAY_JOB_ID}_${SLURM_ARRAY_TASK_ID} name=${SAMPLE}_Aligning_${BLOCK}
@@ -184,7 +187,10 @@ if [ ! -e sorted/${BLOCK}.done ]; then
 	
 	module load picard
 	
-	CMD="srun $(which java) ${JAVA_ARGS} -jar $EBROOTPICARD/picard.jar SortSam ${PIC_ARGS} ${SORT_ARGS} INPUT=$SHM_DIR/align_${BLOCK}.bam OUTPUT=$SHM_DIR/sorted_${BLOCK}.bam"
+	PIC_OUT=$SHM_DIR/$SLURM_ARRAY_JOB_ID/sorted_${BLOCK}.bam
+	mkdir -p $(dir $PIC_OUT)
+	
+	CMD="srun $(which java) ${JAVA_ARGS} -jar $EBROOTPICARD/picard.jar SortSam ${PIC_ARGS} ${SORT_ARGS} INPUT=$BWA_OUT OUTPUT=$PIC_OUT"
 	(echo "$HEADER: ${CMD}" | tee -a ../commands.txt 1>&2)
 	
 	scontrol update jobid=${SLURM_ARRAY_JOB_ID}_${SLURM_ARRAY_TASK_ID} name=${SAMPLE}_Sorting_${BLOCK}
@@ -214,8 +220,8 @@ scontrol update jobid=${SLURM_ARRAY_JOB_ID}_${SLURM_ARRAY_TASK_ID} name=${SAMPLE
 # Run multiple samview splits at once. capped at cpus assigned. Initially slow but should speed up with time.
 if ! for contig in ${CONTIGARRAY[@]}; do echo $contig; done | (
 	srun xargs -I{} --max-procs ${SLURM_JOB_CPUS_PER_NODE} bash -c '{
-		OUTPUT="split/${BLOCK}/{}.bam"
-		CMD="$(which samtools) view -bh -o ${OUTPUT} $SHM_DIR/sorted_${BLOCK}.bam {}"
+		OUTPUT="${RUN_PATH}/split/${BLOCK}/{}.bam"
+		CMD="$(which samtools) view -bh -o ${OUTPUT} $PIC_OUT {}"
 		(echo "$HEADER: ${CMD}" | tee -a ../commands.txt 1>&2)
 		${CMD}
 		(echo "result: $?" 1>&2)
