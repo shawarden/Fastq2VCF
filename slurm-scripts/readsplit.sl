@@ -266,7 +266,7 @@ NR%'$READCOUNT'==1 {
 		print "Block '$READNUM'x"(i-1)" completed in "(end-start)" seconds!" > "/dev/stderr"
 		start=systime()
 	}
-	x="'${ZIP_CMD}' -c > '$RUN_PATH'/'$SLURM_ARRAY_JOB_ID'/blocks/R'$READNUM'_"sprintf("%0"'$FASTQ_MAXZPAD'"d", i++)".fastq.gz"
+	x="'${ZIP_CMD}' -c > '$RUN_PATH'/blocks/R'$READNUM'_"sprintf("%0"'$FASTQ_MAXZPAD'"d", i++)".fastq.gz"
 	system("scontrol update jobid='$SLURM_ARRAY_JOB_ID'_'$SLURM_ARRAY_TASK_ID' name='$SAMPLE'_SplitByRead_"(i-1))
 }
 
