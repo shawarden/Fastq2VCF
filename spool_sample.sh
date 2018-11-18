@@ -337,7 +337,7 @@ case $ENTRY_POINT in
 		
 		if [ "${#FILE_LIST[@]}" -lt "2" ]; then
 			alignInput=""
-			readBlocks=$(find ./blocks -type f -iname "R1_*.fastq.gz" | wc -l)
+			readBlocks=$(find $RUN_PATH/blocks -type f -iname "R1_*.fastq.gz" | wc -l)
 		elif [ "${#FILE_LIST[@]}" -eq "2" ]; then
 			alignInput="-i ${FILE_LIST[0]} -i ${FILE_LIST[1]}"
 			readBlocks="1"

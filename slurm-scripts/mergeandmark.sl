@@ -117,10 +117,11 @@ if [ "$mergeList" == "" ]; then
 	(echo "$HEADER: No inputs defined!" 1>&2)
 	exit $EXIT_IO
 fi
-
+(echo tick 1>&2)
 # Make sure input and target folders exists and that output file does not!
 if ! outDirs; then exit $EXIT_IO; fi
 if ! outFile; then exit $EXIT_IO; fi
+(echo tock 1>&2)
 
 module load picard
 
