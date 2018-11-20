@@ -108,8 +108,8 @@ fi
 # Block depends on input or array id.
 export BLOCK=$(printf "%0${FASTQ_MAXZPAD}d" $SLURM_ARRAY_TASK_ID)
    
-BWA_OUT=${RUN_PATH}/align/align_${BLOCK}.bam
-PIC_OUT=${RUN_PATH}/sort/sorted_${BLOCK}.bam
+export BWA_OUT=${RUN_PATH}/align/align_${BLOCK}.bam
+export PIC_OUT=${RUN_PATH}/sort/sorted_${BLOCK}.bam
  OUTPUT=${RUN_PATH}/split/${BLOCK}/contig_split
 
 mkdir -p $(dirname ${BWA_OUT}) || exit $EXIT_IO;
@@ -202,7 +202,7 @@ fi
 
 storeMetrics
 
-rm $BWA_OUT && (echo "$HEADER: Purged aligned block: $SHM_DIR/align_${BLOCK}.bam" 1>&2)
+#rm $BWA_OUT && (echo "$HEADER: Purged aligned block: $SHM_DIR/align_${BLOCK}.bam" 1>&2)
 
 HEADER="CS"
 JOBSTEP=2
@@ -216,7 +216,7 @@ scontrol update jobid=${SLURM_ARRAY_JOB_ID}_${SLURM_ARRAY_TASK_ID} name=${SAMPLE
 if ! for contig in ${CONTIGARRAY[@]}; do echo $contig; done | (
 	xargs -I{} --max-procs ${SLURM_JOB_CPUS_PER_NODE} bash -c '{
 		OUTPUT="${RUN_PATH}/split/${BLOCK}/{}.bam"
-		CMD="$(which samtools) view -bh -o ${OUTPUT} $PIC_OUT {}"
+		CMD="$(which samtools) view -bh -o ${OUTPUT} ${PIC_OUT} {}"
 		(echo "$HEADER: ${CMD}" | tee -a ../commands.txt 1>&2)
 		${CMD}
 		(echo "result: $?" 1>&2)
@@ -231,7 +231,7 @@ JOBSTEP=""
 SECONDS=$(($SECONDS + $SS_SECONDS + $PA_SECONDS))
 
 df -ah $SHM_DIR
-rm $PIC_OUT && (echo "$HEADER: Purged sorted block: $SHM_DIR/sorted_${BLOCK}.bam" 1>&2)
+# rm $PIC_OUT && (echo "$HEADER: Purged sorted block: $SHM_DIR/sorted_${BLOCK}.bam" 1>&2)
 
 # Remove input files.
 #if [ "${#FILE_LIST[@]}" -lt "1" ]; then 
