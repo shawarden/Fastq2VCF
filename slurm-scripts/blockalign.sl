@@ -164,7 +164,7 @@ if [ ! -e sorted/${BLOCK}.done ]; then
 	module load SAMtools
 	
 	BWA_OUT=$SHM_DIR/$SLURM_ARRAY_JOB_ID/align_${BLOCK}.bam
-	mkdir -p $(dir $BWA_OUT)
+	mkdir -p $(dirname $BWA_OUT)
 	
 	# Pipe output from alignment into sortsam
 	CMD="srun $(which bwa) mem -M -t ${SLURM_JOB_CPUS_PER_NODE} -R @RG'\t'$RG_ID'\t'$RG_PL'\t'$RG_PU'\t'$RG_LB'\t'$RG_SM $BWA_REF $READ1 $READ2 | $(which samtools) view -bh - > $BWA_OUT"
@@ -188,7 +188,7 @@ if [ ! -e sorted/${BLOCK}.done ]; then
 	module load picard
 	
 	PIC_OUT=$SHM_DIR/$SLURM_ARRAY_JOB_ID/sorted_${BLOCK}.bam
-	mkdir -p $(dir $PIC_OUT)
+	mkdir -p $(dirname $PIC_OUT)
 	
 	CMD="srun $(which java) ${JAVA_ARGS} -jar $EBROOTPICARD/picard.jar SortSam ${PIC_ARGS} ${SORT_ARGS} INPUT=$BWA_OUT OUTPUT=$PIC_OUT"
 	(echo "$HEADER: ${CMD}" | tee -a ../commands.txt 1>&2)
@@ -202,7 +202,7 @@ if [ ! -e sorted/${BLOCK}.done ]; then
 	
 	storeMetrics
 	
-	rm $SHM_DIR/align_${BLOCK}.bam && (echo "$HEADER: Purged aligned block: $SHM_DIR/align_${BLOCK}.bam" 1>&2)
+	rm $BWA_OUT && (echo "$HEADER: Purged aligned block: $SHM_DIR/align_${BLOCK}.bam" 1>&2)
 else
 	(echo "$HEADER: Alignment already completed!" 1>&2)
 	SS_SECONDS=$SECONDS
@@ -236,12 +236,12 @@ JOBSTEP=""
 SECONDS=$(($SECONDS + $SS_SECONDS + $PA_SECONDS))
 
 df -ah $SHM_DIR
-rm $SHM_DIR/sorted_${BLOCK}.bam && (echo "$HEADER: Purged sorted block: $SHM_DIR/sorted_${BLOCK}.bam" 1>&2)
+rm $PIC_OUT && (echo "$HEADER: Purged sorted block: $SHM_DIR/sorted_${BLOCK}.bam" 1>&2)
 
 # Remove input files.
-if [ "${#FILE_LIST[@]}" -lt "1" ]; then 
-	rm ${READ1} ${READ2} && (echo "$HEADER: Purged source read block files!" 1>&2)
-fi
+#if [ "${#FILE_LIST[@]}" -lt "1" ]; then 
+#	rm ${READ1} ${READ2} && (echo "$HEADER: Purged source read block files!" 1>&2)
+#fi
 
 # Indicate completion.
 touch ${OUTPUT}.done

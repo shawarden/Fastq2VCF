@@ -93,8 +93,8 @@ CONTIG=${CONTIGBLOCKS[$SLURM_ARRAY_TASK_ID]}
   BQSR=${SHM_DIR}/${SLURM_ARRAY_JOB_ID}/bqsr_${CONTIG}.firstpass
 OUTPUT=${SAMPLE_PATH}/printreads/${CONTIG}.bam
 
-mkdir -p $(dir $BQSR)
-mkdir -p $(dir $OUTPUT)
+mkdir -p $(dirname $BQSR)
+mkdir -p $(dirname $OUTPUT)
 
 HEADER="RC"
 

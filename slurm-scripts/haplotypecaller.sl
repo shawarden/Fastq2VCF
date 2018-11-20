@@ -126,7 +126,7 @@ else
 fi
 
 OUTPUT=${SAMPLE_PATH}/haplo/${CONTIG}.${FINAL_TYPE}.gz
-mkdir -p $(dir $OUTPUT)
+mkdir -p $(dirname $OUTPUT)
 
 if [ -e coverage.sh ]; then
 	# Gender file exists so obtain values from it.
