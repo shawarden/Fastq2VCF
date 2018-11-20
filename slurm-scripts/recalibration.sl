@@ -90,7 +90,7 @@ CONTIG=${CONTIGBLOCKS[$SLURM_ARRAY_TASK_ID]}
 	INPUT=markdup/${CONTIG}.bam || \
 	INPUT=${FILE_LIST[0]}
 
-  BQSR=${SHM_DIR}/${SLURM_ARRAY_JOB_ID}/bqsr_${CONTIG}.firstpass
+  BQSR=${SAMPLE_PATH}/bqsr/${CONTIG}.firstpass
 OUTPUT=${SAMPLE_PATH}/printreads/${CONTIG}.bam
 
 mkdir -p $(dirname $BQSR)
@@ -98,7 +98,7 @@ mkdir -p $(dirname $OUTPUT)
 
 HEADER="RC"
 
-(echo "$HEADER: ${INPUT} -> BQSR -> ${OUTPUT}" 1>&2)
+(echo "$HEADER: ${INPUT} -> ${BQSR} -> ${OUTPUT}" 1>&2)
 
 
 # Make sure input and target folders exists and that output file does not!
@@ -123,7 +123,7 @@ fi
 
 HEADER="BR"
 
-CMD="srun $(which java) ${JAVA_ARGS} -jar $GATK_JAR ${GATK_BSQR} -L ${CONTIG} ${GATK_ARGS} -I ${INPUT} -o ${JOB_TEMP_DIR}/${BQSR}"
+CMD="$(which java) ${JAVA_ARGS} -jar $GATK_JAR ${GATK_BSQR} -L ${CONTIG} ${GATK_ARGS} -I ${INPUT} -o ${BQSR}"
 (echo "$HEADER: ${CMD}" | tee -a commands.txt 1>&2)
 
 JOBSTEP=0
@@ -140,7 +140,7 @@ SECONDS=0
 
 HEADER="PR"
 
-CMD="srun $(which java) ${JAVA_ARGS} -jar $GATK_JAR ${GATK_READ} -L ${CONTIG} ${GATK_ARGS} -I ${INPUT} -BQSR ${BQSR} -o ${OUTPUT}"
+CMD="$(which java) ${JAVA_ARGS} -jar $GATK_JAR ${GATK_READ} -L ${CONTIG} ${GATK_ARGS} -I ${INPUT} -BQSR ${BQSR} -o ${OUTPUT}"
 (echo "$HEADER: ${CMD}" | tee -a commands.txt 1>&2)
 
 JOBSTEP=1

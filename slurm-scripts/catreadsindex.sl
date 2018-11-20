@@ -89,7 +89,7 @@ if ! outFile; then exit $EXIT_IO; fi
 
 module load SAMtools
 
-CMD="srun $(which samtools) index ${INPUT} ${OUTPUT}"
+CMD="$(which samtools) index ${INPUT} ${OUTPUT}"
 (echo "$HEADER: ${CMD}" | tee -a commands.txt 1>&2)
 
 JOBSTEP=0

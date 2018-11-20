@@ -139,7 +139,7 @@ JOBSTEP=0
 #MC_SECONDS=$SECONDS
 SECONDS=0
 HEADER="MD"
-CMD="srun $(which java) ${JAVA_ARGS} -jar $EBROOTPICARD/picard.jar MarkDuplicates ${PIC_ARGS} ${MARK_ARGS} ${mergeList} OUTPUT=${OUTPUT}" 
+CMD="$(which java) ${JAVA_ARGS} -jar $EBROOTPICARD/picard.jar MarkDuplicates ${PIC_ARGS} ${MARK_ARGS} ${mergeList} OUTPUT=${OUTPUT}" 
 #CMD="srun $(which java) ${JAVA_ARGS} -jar $EBROOTPICARD/picard.jar MarkDuplicates ${PIC_ARGS} ${MARK_ARGS} INPUT=${MERGED} OUTPUT=${OUTPUT}" 
 (echo "$HEADER: ${CMD}" | tee -a commands.txt 1>&2)
 
