@@ -108,12 +108,12 @@ fi
 # Block depends on input or array id.
 export BLOCK=$(printf "%0${FASTQ_MAXZPAD}d" $SLURM_ARRAY_TASK_ID)
    
-BWA_OUT=$SHM_DIR/$SLURM_ARRAY_JOB_ID/align_${BLOCK}.bam
-PIC_OUT=$SHM_DIR/$SLURM_ARRAY_JOB_ID/sorted_${BLOCK}.bam
-OUTPUT=${RUN_PATH}/split/${BLOCK}/contig_split
+BWA_OUT=${RUN_PATH}/align/align_${BLOCK}.bam
+PIC_OUT=${RUN_PATH}/sort/sorted_${BLOCK}.bam
+ OUTPUT=${RUN_PATH}/split/${BLOCK}/contig_split
 
-mkdir -p $(dirname $BWA_OUT) || exit $EXIT_IO;
-mkdir -p $(dirname $PIC_OUT) || exit $EXIT_IO;
+mkdir -p $(dirname ${BWA_OUT}) || exit $EXIT_IO;
+mkdir -p $(dirname ${PIC_OUT}) || exit $EXIT_IO;
 mkdir -p $(dirname ${OUTPUT}) || exit $EXIT_IO;
 
 (echo "Output locations sed" 1>&2)
