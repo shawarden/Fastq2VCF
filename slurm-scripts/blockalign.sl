@@ -170,7 +170,7 @@ module load BWA
 module load SAMtools
 
 # Pipe output from alignment into sortsam
-CMD="srun $(which bwa) mem -M -t ${SLURM_JOB_CPUS_PER_NODE} -R @RG'\t'$RG_ID'\t'$RG_PL'\t'$RG_PU'\t'$RG_LB'\t'$RG_SM $BWA_REF $READ1 $READ2 | $(which samtools) view -bh - > $BWA_OUT"
+CMD="$(which bwa) mem -M -t ${SLURM_JOB_CPUS_PER_NODE} -R @RG'\t'$RG_ID'\t'$RG_PL'\t'$RG_PU'\t'$RG_LB'\t'$RG_SM $BWA_REF $READ1 $READ2 | $(which samtools) view -bh - > $BWA_OUT"
 (echo "$HEADER: ${CMD}" | tee -a ../commands.txt 1>&2)
 
 scontrol update jobid=${SLURM_ARRAY_JOB_ID}_${SLURM_ARRAY_TASK_ID} name=${SAMPLE}_Aligning_${BLOCK}
@@ -190,7 +190,7 @@ JOBSTEP=1
 
 module load picard
 	
-CMD="srun $(which java) ${JAVA_ARGS} -jar $EBROOTPICARD/picard.jar SortSam ${PIC_ARGS} ${SORT_ARGS} INPUT=$BWA_OUT OUTPUT=$PIC_OUT"
+CMD="$(which java) ${JAVA_ARGS} -jar $EBROOTPICARD/picard.jar SortSam ${PIC_ARGS} ${SORT_ARGS} INPUT=$BWA_OUT OUTPUT=$PIC_OUT"
 (echo "$HEADER: ${CMD}" | tee -a ../commands.txt 1>&2)
 
 scontrol update jobid=${SLURM_ARRAY_JOB_ID}_${SLURM_ARRAY_TASK_ID} name=${SAMPLE}_Sorting_${BLOCK}
@@ -214,7 +214,7 @@ scontrol update jobid=${SLURM_ARRAY_JOB_ID}_${SLURM_ARRAY_TASK_ID} name=${SAMPLE
 
 # Run multiple samview splits at once. capped at cpus assigned. Initially slow but should speed up with time.
 if ! for contig in ${CONTIGARRAY[@]}; do echo $contig; done | (
-	srun xargs -I{} --max-procs ${SLURM_JOB_CPUS_PER_NODE} bash -c '{
+	xargs -I{} --max-procs ${SLURM_JOB_CPUS_PER_NODE} bash -c '{
 		OUTPUT="${RUN_PATH}/split/${BLOCK}/{}.bam"
 		CMD="$(which samtools) view -bh -o ${OUTPUT} $PIC_OUT {}"
 		(echo "$HEADER: ${CMD}" | tee -a ../commands.txt 1>&2)
