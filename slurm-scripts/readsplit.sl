@@ -301,7 +301,7 @@ bestIndex=$(getBestIndex)
 
 (echo "$HEADER: Best index is [${bestIndex}]" 1>&2)
 
-mkdir -p $RUN_PATH/$SLURM_ARRAY_JOB_ID/blocks
+mkdir -p $RUN_PATH/blocks
 
 JOBSTEP="batch"
 
