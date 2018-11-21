@@ -88,9 +88,9 @@ HEADER="MM"
 
 
 # Blocks do not need to be sequential do they?
-#contigMerBlocks=$(find . -type f -iwholename "$SAMPLE_PATH/*/split/*/${CONTIG}.bam") -printf '%h\0%d\0%p\n' | sort -t '\0' -n | awk -F '\0' '{print $3}')
+#contigMerBlocks=$(find . -type f -iwholename "$SAMPLE_PATH/split/*/${CONTIG}.bam") -printf '%h\0%d\0%p\n' | sort -t '\0' -n | awk -F '\0' '{print $3}')
 # Get list of blocks of the base contig and all alternates.
-contigMerBlocks=$(find . -type f -iwholename "$SAMPLE_PATH/*/split/*/${CONTIG}.bam"; find . -type f -iwholename "*/split/*/${CONTIG}_*.bam"; find . -type f -iwholename "*/split/*/${CONTIG}\**.bam" | tr '\n' ' ')
+contigMerBlocks=$(find . -type f -iwholename "$SAMPLE_PATH/split/*/${CONTIG}.bam"; find . -type f -iwholename "*/split/*/${CONTIG}_*.bam"; find . -type f -iwholename "*/split/*/${CONTIG}\**.bam" | tr '\n' ' ')
 
 numcontigMerBlocks=$(echo "$contigMerBlocks" | wc -l)
 
