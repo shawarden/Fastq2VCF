@@ -126,7 +126,7 @@ else
 
 	# ReadSplit.
 	SB[RS]="ReadSplit"
-	SB[RS,MWT]=180
+	SB[RS,MWT]=240
 	SB[RS,MEM]=2048
 	SB[RS,CPT]=4
 
