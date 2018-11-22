@@ -162,7 +162,7 @@ then
 
 fi
 
-CMD="$(which java) ${JAVA_ARGS} -jar $GATK_JAR ${GATK_ARGS} ${inputList} -o ${OUTPUT}"
+CMD="srun $(which java) ${JAVA_ARGS} -jar $GATK_JAR ${GATK_ARGS} ${inputList} -o ${OUTPUT}"
 (echo "$HEADER: ${CMD}" | tee -a commands.txt 1>&2)
 
 JOBSTEP=0

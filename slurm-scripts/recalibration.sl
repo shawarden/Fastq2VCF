@@ -123,7 +123,7 @@ fi
 
 HEADER="BR"
 
-CMD="$(which java) ${JAVA_ARGS} -jar $GATK_JAR ${GATK_BSQR} -L ${CONTIG} ${GATK_ARGS} -I ${INPUT} -o ${BQSR}"
+CMD="srun $(which java) ${JAVA_ARGS} -jar $GATK_JAR ${GATK_BSQR} -L ${CONTIG} ${GATK_ARGS} -I ${INPUT} -o ${BQSR}"
 (echo "$HEADER: ${CMD}" | tee -a commands.txt 1>&2)
 
 JOBSTEP=0
@@ -140,7 +140,7 @@ SECONDS=0
 
 HEADER="PR"
 
-CMD="$(which java) ${JAVA_ARGS} -jar $GATK_JAR ${GATK_READ} -L ${CONTIG} ${GATK_ARGS} -I ${INPUT} -BQSR ${BQSR} -o ${OUTPUT}"
+CMD="srun $(which java) ${JAVA_ARGS} -jar $GATK_JAR ${GATK_READ} -L ${CONTIG} ${GATK_ARGS} -I ${INPUT} -BQSR ${BQSR} -o ${OUTPUT}"
 (echo "$HEADER: ${CMD}" | tee -a commands.txt 1>&2)
 
 JOBSTEP=1

@@ -68,8 +68,8 @@ else
 	# Version controlled executables #
 	##################################
 
-	export   ZIP_CMD=/usr/bin/pigz  
-	export   CAT_CMD="${ZIP_CMD} -p $([ -n $SLURM_CPUS_PER_TASK ] && echo $SLURM_CPUS_PER_TASK || echo 1) -cd"
+	export   ZIP_CMD=/usr/bin/pigz
+	export   CAT_CMD="${ZIP_CMD} -cd"
 	export SPLIT_CMD=/usr/bin/split
 
 	####################
