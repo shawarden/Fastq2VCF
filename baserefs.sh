@@ -68,8 +68,8 @@ else
 	# Version controlled executables #
 	##################################
 
-	export   ZIP_CMD=/usr/bin/pigz
-	export   CAT_CMD="${ZIP_CMD} -cd"
+	export   ZIP_CMD=/usr/bin/pigz  
+	export   CAT_CMD="${ZIP_CMD} -p $([ -n $SLURM_CPUS_PER_TASK ] && echo $SLURM_CPUS_PER_TASK || echo 1) -cd"
 	export SPLIT_CMD=/usr/bin/split
 
 	####################
@@ -127,8 +127,8 @@ else
 	# ReadSplit.
 	SB[RS]="ReadSplit"
 	SB[RS,MWT]=180
-	SB[RS,MEM]=3072
-	SB[RS,CPT]=6
+	SB[RS,MEM]=2048
+	SB[RS,CPT]=4
 
 	# Block alignment (Merged PA, SS & CS)
 	SB[PA]="Align"

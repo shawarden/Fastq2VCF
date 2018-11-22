@@ -140,6 +140,7 @@ END {
 # If the index varies by more than FASTQ_MAXDIFF then split to new output file.
 # Output files are appended with the index line data.
 function awkByReadsAndGroup {
+	scontrol update jobid=${SLURM_ARRAY_JOB_ID}_${SLURM_ARRAY_TASK_ID} name=${SAMPLE}_awkByReadsAndGroup
 	if ! ${CAT_CMD} ${INPUT} | awk -F'[@:]' \
 		-v zeroPad="$FASTQ_MAXZPAD" \
 		-v outHeader="$HEADER" \
@@ -251,6 +252,7 @@ END {
 }
 
 function awkByRead {
+	scontrol update jobid=${SLURM_ARRAY_JOB_ID}_${SLURM_ARRAY_TASK_ID} name=${SAMPLE}_awkByRead
 	if ! ${CAT_CMD} ${INPUT} | awk '
 # Starting conditions.
 BEGIN {
@@ -286,7 +288,44 @@ END {
 	fi
 }
 
+# Creates a set number of roughly even sized files.
+# This should allow us to allocate job id all at once instead of guessing.
+function AwkToSetCount {
+	scontrol update jobid=${SLURM_ARRAY_JOB_ID}_${SLURM_ARRAY_TASK_ID} name=${SAMPLE}_awkToSetCount
+	blockCount=$1
+	if ! ${CAT_CMD} ${INPUT} | awk '
+# Every 4th line
+(NR-1)%4==0{
+	# Have we cycled through blockcount?
+	if ( i == '$blockCount') {
+		# We have reached blockCount. Reset to 1.
+		i = 1
+	} else {
+		# We have not reached blockCount. Increment.
+		i++
+	}
+}
+
+# Output current line to given file.
+{
+	print | "'${ZIP_CMD}' -c > '$RUN_PATH'/blocks/R'$READNUM'_"sprintf("%0"'$FASTQ_MAXZPAD'"d", i)".fastq.gz"
+}
+
+# We are done.
+END {
+	# Cycle through open files/pipes.
+	for (i=1; i=='$blockCount'; i++) {
+		# Close them off.
+		close ("'${ZIP_CMD}' -c > '$RUN_PATH'/blocks/R'$READNUM'_"sprintf("%0"'$FASTQ_MAXZPAD'"d", i)".fastq.gz")
+	}
+}
+	'; then
+		exit $EXIT_PR
+	fi
+}
+
 function splitByRead {
+	scontrol update jobid=${SLURM_ARRAY_JOB_ID}_${SLURM_ARRAY_TASK_ID} name=${SAMPLE}_splitByRead
 	echo "$HEADER: srun ${CAT_CMD} ${INPUT} | ${SPLIT_CMD} -d -a $FASTQ_MAXZPAD -l $READCOUNT --filter='${ZIP_CMD} > $FILE.fastq.gz' - blocks/R${READNUM}_" | tee -a commands.txt
 	if ! ${CAT_CMD} ${INPUT} | ${SPLIT_CMD} -d -a $FASTQ_MAXZPAD -l $READCOUNT --filter='${ZIP_CMD} > $FILE.fastq.gz' - blocks/R${READNUM}_
 	then
@@ -305,23 +344,23 @@ mkdir -p $RUN_PATH/blocks
 
 JOBSTEP="batch"
 
-scontrol update jobid=${SLURM_ARRAY_JOB_ID}_${SLURM_ARRAY_TASK_ID} name=${SAMPLE}_awkByRead
-
-if ! awkByRead; then
+if ! AwkToSetCount 50; then
 	cmdFailed $?
 	exit $EXIT_PR
 fi
 
 touch ${RUN_PATH}/${SAMPLE}_R${READNUM}_split.done
 
-if [ ! -e ${RUN_PATH}/${SAMPLE}_R${PAIRNUM}_split.done ]; then
-	(echo "Paired read not completed!" 1>&2)
-else
-	(echo "Paired read done!" 1>&2)
-	if ! ${PBIN}/spool_sample.sh -e BA -s $SAMPLE -p $PLATFORM $MULTI_RUN -t $FINAL_TYPE; then
-		cmdFailed $?
-		exit $EXIT_PR
-	fi
-	
-fi
+exit 0
+
+#if [ ! -e ${RUN_PATH}/${SAMPLE}_R${PAIRNUM}_split.done ]; then
+#	(echo "Paired read not completed!" 1>&2)
+#else
+#	(echo "Paired read done!" 1>&2)
+#	if ! ${PBIN}/spool_sample.sh -e BA -s $SAMPLE -p $PLATFORM $MULTI_RUN -t $FINAL_TYPE; then
+#		cmdFailed $?
+#		exit $EXIT_PR
+#	fi
+#	
+#fi
 

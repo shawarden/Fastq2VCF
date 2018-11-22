@@ -323,9 +323,7 @@ case $ENTRY_POINT in
 			(printf "done\n" 1>&2)
 			${PBIN}/spool_sample.sh -e BA -s $SAMPLE -p $PLATFORM $MULTI_RUN -e BA
 		fi
-		
-		exit 0
-		;;
+		;&
 	BA)
 		##########################
 		# Generate Block Alignment
@@ -335,12 +333,17 @@ case $ENTRY_POINT in
 		
 		(printf "%-22s" "Align->Sort->Split" 1>&2)
 		
-		if [ "${#FILE_LIST[@]}" -lt "2" ]; then
+		if [ "$ENTRY_POINT" == "BA" ]; then
+			if [ "${#FILE_LIST[@]}" -lt "2" ]; then
+				alignInput=""
+				readBlocks=$(find $RUN_PATH/blocks -type f -iname "R1_*.fastq.gz" | wc -l)
+			elif [ "${#FILE_LIST[@]}" -eq "2" ]; then
+				alignInput="-i ${FILE_LIST[0]} -i ${FILE_LIST[1]}"
+				readBlocks="1"
+			fi
+		else
 			alignInput=""
-			readBlocks=$(find $RUN_PATH/blocks -type f -iname "R1_*.fastq.gz" | wc -l)
-		elif [ "${#FILE_LIST[@]}" -eq "2" ]; then
-			alignInput="-i ${FILE_LIST[0]} -i ${FILE_LIST[1]}"
-			readBlocks="1"
+			readBlocks="50"
 		fi
 		
 		for i in $(seq 1 $readBlocks); do
@@ -351,7 +354,7 @@ case $ENTRY_POINT in
 		done
 		
 		if [ "$alignArray" != "" ]; then
-			DEP_BA=$(sbatch $(dispatch "BA") -J BA_${SAMPLE} --array=${alignArray}${ARRAYTHROTTLE} $SLSBIN/blockalign.sl -s $SAMPLE $alignInput $MULTI_RUN | awk '{print $4}')
+			DEP_BA=$(sbatch $(dispatch "BA") -J BA_${SAMPLE} --array=${alignArray}${ARRAYTHROTTLE} $(depCheck $DEP_RS) $SLSBIN/blockalign.sl -s $SAMPLE $alignInput $MULTI_RUN | awk '{print $4}')
 			if [ $? -ne 0 ] || [ "$DEP_BA" == "" ]; then
 				(printf "FAILED!\n" 1>&2)
 				echo $ALIGNMESG
