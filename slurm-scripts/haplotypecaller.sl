@@ -177,6 +177,8 @@ GATK_ARGS="-T ${GATK_PROC} \
 [ "$FINAL_TYPE" == "g.vcf" ] && GATK_ARGS="$GATK_ARGS --emitRefConfidence GVCF"
 [ "$FINAL_TYPE" == "vcf" ] && GATK_ARGS="$GATK_ARGS -variant_index_type LINEAR -variant_index_parameter 128000"
 
+module load Java/1.8.0_144
+
 if [ -z $GATK_JAR ]
 then
 	(echo "Loading GATK Module" 1>&2)

@@ -154,6 +154,9 @@ GATK_ARGS="-T ${GATK_PROC} \
 --omitIntervalStatistics \
 -nt ${SLURM_JOB_CPUS_PER_NODE}"
 
+module load Java/1.8.0_144
+
+
 if [ -z $GATK_JAR ]
 then
 	(echo "Loading GATK Module" 1>&2)

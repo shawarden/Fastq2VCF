@@ -114,6 +114,9 @@ if [ ! -e $INPUT_BAI ]; then
 	samtools index $INPUT $INPUT_BAI
 fi
 
+
+module load Java/1.8.0_144
+
 if [ -z $GATK_JAR ]
 then
 	(echo "Loading GATK Module" 1>&2)

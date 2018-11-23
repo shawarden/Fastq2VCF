@@ -101,6 +101,8 @@ done
 if ! outDirs; then exit $EXIT_IO; fi
 if ! outFile; then exit $EXIT_IO; fi
 
+module load Java/1.8.0_144
+
 GATK_PROC=org.broadinstitute.gatk.tools.CatVariants
 GATK_ARGS="${GATK_PROC} \
 -R ${REFA} \
