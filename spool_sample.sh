@@ -321,7 +321,7 @@ case $ENTRY_POINT in
 			fi
 		else
 			(printf "done\n" 1>&2)
-			${PBIN}/spool_sample.sh -e BA -s $SAMPLE -p $PLATFORM $MULTI_RUN -e BA
+			#${PBIN}/spool_sample.sh -e BA -s $SAMPLE -p $PLATFORM $MULTI_RUN -e BA
 		fi
 		;&
 	BA)
