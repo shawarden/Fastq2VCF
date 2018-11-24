@@ -723,7 +723,7 @@ case $ENTRY_POINT in
 		
 		(printf "%-22s" "CatVariants" 1>&2)
 		
-		catVarOutput=${SAMPLE_PATH}/${IDN}.${FINAL_TYPE}
+		catVarOutput=${SAMPLE_PATH}/${IDN}.${FINAL_TYPE}.gz
 		CatVarInputs=""
 		
 		for contig in ${CONTIGARRAY[@]}; do
