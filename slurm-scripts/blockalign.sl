@@ -108,8 +108,8 @@ fi
 # Block depends on input or array id.
 export BLOCK=$(printf "%0${FASTQ_MAXZPAD}d" $SLURM_ARRAY_TASK_ID)
    
-export BWA_OUT=${RUN_PATH}/align/align_${BLOCK}.bam
-export PIC_OUT=${RUN_PATH}/sort/sorted_${BLOCK}.bam
+export BWA_OUT=${TMPDIR}/align_${BLOCK}.bam
+export PIC_OUT=${TMPDIR}/sorted_${BLOCK}.bam
  OUTPUT=${RUN_PATH}/split/${BLOCK}/contig_split
 
 mkdir -p $(dirname ${BWA_OUT}) || exit $EXIT_IO;

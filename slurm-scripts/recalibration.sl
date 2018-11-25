@@ -90,7 +90,7 @@ CONTIG=${CONTIGBLOCKS[$SLURM_ARRAY_TASK_ID]}
 	INPUT=markdup/${CONTIG}.bam || \
 	INPUT=${FILE_LIST[0]}
 
-  BQSR=${SAMPLE_PATH}/bqsr/${CONTIG}.firstpass
+  BQSR=${TMPDIR}/${CONTIG}.firstpass
 OUTPUT=${SAMPLE_PATH}/printreads/${CONTIG}.bam
 
 mkdir -p $(dirname $BQSR)

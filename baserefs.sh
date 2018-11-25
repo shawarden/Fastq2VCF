@@ -19,7 +19,7 @@ else
 
 	export WORK_PATH="/scratch/$USER"
 
-	export ARRAYTHROTTLE="" # "%6" # Only allow 6 to run at a time.
+	export ARRAYTHROTTLE="%8" # "%6" # Only allow 6 to run at a time.
 
 	#export ENDPOINT_NESI=nesi#pan_auckland
 	#export ENDPOINT_UOO=nesi#otago-dtn01
