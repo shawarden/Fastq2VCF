@@ -66,8 +66,9 @@ else
 	##################################
 	# Version controlled executables #
 	##################################
-
-	export   ZIP_CMD=/usr/bin/pigz
+	
+	export ZIP_CORES=$([ -n $SLURM_CPUS_ON_NODE ] && echo "$SLURM_CPUS_ON_NODE " || echo "1")
+	export   ZIP_CMD=/usr/bin/gzip
 	export   CAT_CMD="${ZIP_CMD} -cd"
 	export SPLIT_CMD=/usr/bin/split
 
