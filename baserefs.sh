@@ -47,8 +47,7 @@ else
 	#export          REF=${BUNDLE}/Homo_sapiens_assembly38
 
 	export         REFA=${REF}.fasta
-	export JOB_TEMP_DIR=$SHM_DIR
-	#$([ "${TMPDIR}" != "" ] && echo "${TMPDIR}" || echo "$SCRATCH_DIR/tmp")
+	export JOB_TEMP_DIR=$TMPDIR
 
 	if [ ! -d $SCRATCH ]
 	then
@@ -120,7 +119,7 @@ else
 	# WALLTIME=BASE_MULTIPLIER * CONTIG_MULTIPLIER * CALIBRATED_MAX_WALLTIME * (INPUT_SIZE / CALIBRATED_INPUT_SIZE)
 	# WALLTIME=$(printf "%f\n" $(echo "${SB[BWTM]} * ${SB[WTM,${CONTIGNUMBER}]} * ${SB[${HEADER},MWT]} * ($INPUT_FILE_SIZE / $CALIBRATED_FILE_SIZE)" | bc -l))
 	#
-		SB[BWTM]=1.25	# Base wall-time multiplier.
+	SB[BWTM]=1.25	# Base wall-time multiplier.
 	#SB[MWT]=359		# Maximum wall-time to be in High partition.
 	SB[MWT]=1440	# 1 day.
 
