@@ -34,11 +34,8 @@ function usage {
 $(for file in ${PLATFORMS}/*.bed; do platFile=$(basename $file); platName=${platFile%.bed}; [ -e "${file%.*}.sh" ] && echo "*                  $platName"; done)
 *
 * Optional:
-*   ${ylw}-b [NUM]        WIP${nrm}
-*                  Number of reads per split block
-*                  Default: \$FASTQ_MAXREAD ($FASTQ_MAXREAD)
-*                  appending 's' will attempt to split reads into that many
-*                  blocks of roughly equal size.
+*   -b [NUM]       Number of split block so create.
+*                  Default: \$FASTQ_SPLITNM ($FASTQ_SPLITNM)
 *   -c [STRING]    Force HaplotypeCaller on X & Y with specified ploidy.
 *                  Entered as XY combination: XX, XY, XXY, XYY, XXYY, etc.
 *                  Default: Automatic
@@ -56,12 +53,16 @@ $(for file in ${PLATFORMS}/*.bed; do platFile=$(basename $file); platName=${plat
 *                  address listed in /etc/slurm/userlist.
 *                  ${ylw}Required if address list is unavailable.${nrm}
 *   ${ylw}-g [Gender]    WIP${nrm}
-*                  Gender: Male/Female/Unknown
+*                  Gender Alert: Male/Female/Unknown
+*                  Specifying a gender will trigger a warning if automatch fails.
+*                  Job will continue with automatically detected Gender.
+*                  Use -c to enforce specified chromosomal gender.  
 *                  Default: Automatic
 *   -m             Set this sample as one of many for individual.
 *                  Halts after contig split
 *                  Omit for final sample for individual.
-*                  ${ylw}Do not perform multiple runs simultaneously as final run will${nrm}
+*                  You can submit multiple segments simultaneously but...
+*                  ${ylw}Do not perform final run simultaneously as it will${nrm}
 *                  ${ylw}merge all partial samples for individual.${nrm}
 *   ${bred}-o [PATH]      WIP (not working)${nrm}
 *                  Path to final output location.
@@ -82,13 +83,8 @@ do
 			exit 0
 			;;
 		b)
-			if [[ "${OPTARG}" == *s ]]; then
-				export SMART_READS="${OPTARG%s*}"
-				(printf "%-22s%s\n" "Smart Blocks" $SMART_READS 1>&2)
-			else
-				export FASTQ_MAXREAD=${OPTARG}
-				(printf "%-22s%s\n" "MaxReads" $FASTQ_MAXREAD 1>&2)
-			fi
+			export FASTQ_SPLITNM="${OPTARG%s*}"
+			(printf "%-22s%s\n" "Split Blocks" $FASTQ_SPLITNM 1>&2)
 			;;
 		c)
 			export SEXCHR=${OPTARG}
@@ -311,7 +307,7 @@ case $ENTRY_POINT in
 			fi
 			
 			# Split array contains data so run the missing split function.
-			DEP_RS=$(sbatch $(dispatch "RS") -J RS_${SAMPLE}_${read1Size}_${read2Size} -a ${splitReadArray}${ARRAYTHROTTLE} $SLSBIN/readsplit.sl -s $SAMPLE -i ${FILE_LIST[0]} -i ${FILE_LIST[1]} -b $FASTQ_MAXREAD $MULTI_RUN -p $PLATFORM | awk '{print $4}')
+			DEP_RS=$(sbatch $(dispatch "RS") -J RS_${SAMPLE}_${read1Size}_${read2Size} -a ${splitReadArray}${ARRAYTHROTTLE} $SLSBIN/readsplit.sl -s $SAMPLE -i ${FILE_LIST[0]} -i ${FILE_LIST[1]} -b $FASTQ_SPLITNM $MULTI_RUN -p $PLATFORM | awk '{print $4}')
 			if [ $? -ne 0 ] || [ "$DEP_RS" == "" ]; then
 				(printf "FAILED!\n" 1>&2)
 				exit 1
@@ -343,7 +339,7 @@ case $ENTRY_POINT in
 			fi
 		else
 			alignInput=""
-			readBlocks="50"
+			readBlocks="$FASTQ_SPLITNM"
 		fi
 		
 		for i in $(seq 1 $readBlocks); do

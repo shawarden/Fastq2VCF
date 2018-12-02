@@ -83,7 +83,8 @@ else
 	# FastQ Split Data management #
 	###############################
 
-	export FASTQ_MAXREAD=10000000	# How many reads per block.
+	export FASTQ_SPLITNM=50			# How many blocks to create
+	export FASTQ_MAXREAD=25000		# How many reads per block.
 	export FASTQ_MAXSCAN=10000		# How many lines to check for best index.
 	export FASTQ_MAXDIFF=2			# Maximum index variation before new index is created.
 	export FASTQ_MAXJOBS=100		# Maximum number of alignment & sort array elements.
@@ -326,7 +327,7 @@ export OPENBLAS_MAIN_FREE=1
 PIC_ARGS="CREATE_INDEX=true \
 COMPRESSION_LEVEL=9 \
 MAX_RECORDS_IN_RAM=${MAX_RECORDS} \
-TMP_DIR=${JOB_TEMP_DIR}"
+TMP_DIR=${TMPDIR}"
 
 # Sort specific arguments
 SORT_ARGS="SORT_ORDER=coordinate"

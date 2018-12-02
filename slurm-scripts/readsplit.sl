@@ -37,8 +37,8 @@ function usage {
 *
 * Options:
 *   ${ylw}-b [NUM]       WIP${nrm}
-*                  Number of reads per split block
-*                  Default: \$FASTQ_MAXREAD ($FASTQ_MAXREAD)
+*                  Number of block to create
+*                  Default: \$FASTQ_SPLITNM ($FASTQ_SPLITNM)
 *   -m             Set this sample as one of many for individual.
 *                  Halts after contig split
 *                  Omit for final sample for individual.
@@ -293,9 +293,10 @@ END {
 function AwkToSetCount {
 	scontrol update jobid=${SLURM_ARRAY_JOB_ID}_${SLURM_ARRAY_TASK_ID} name=${SAMPLE}_awkToSetCount
 	blockCount=$1
+	readBlocks=$(($2 * 4))
 	if ! ${CAT_CMD} ${INPUT} | awk '
-# Every 4th line
-(NR-1)%4==0{
+# Every readBlocks record
+(NR-1)%'$readBlocks'==0{
 	# Have we cycled through blockcount?
 	if ( i == '$blockCount') {
 		# We have reached blockCount. Reset to 1.
@@ -344,7 +345,7 @@ mkdir -p $RUN_PATH/blocks
 
 JOBSTEP="batch"
 
-if ! AwkToSetCount 50; then
+if ! AwkToSetCount $FASTQ_SPLITNM; then
 	cmdFailed $?
 	exit $EXIT_PR
 fi
