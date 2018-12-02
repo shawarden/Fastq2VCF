@@ -345,7 +345,7 @@ mkdir -p $RUN_PATH/blocks
 
 JOBSTEP="batch"
 
-if ! AwkToSetCount $FASTQ_SPLITNM; then
+if ! AwkToSetCount $FASTQ_SPLITNM $FASTQ_MAXREAD; then
 	cmdFailed $?
 	exit $EXIT_PR
 fi

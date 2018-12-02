@@ -83,7 +83,7 @@ do
 			exit 0
 			;;
 		b)
-			export FASTQ_SPLITNM="${OPTARG%s*}"
+			export FASTQ_SPLITNM="${OPTARG}"
 			(printf "%-22s%s\n" "Split Blocks" $FASTQ_SPLITNM 1>&2)
 			;;
 		c)
@@ -225,8 +225,6 @@ if [ "$MAIL_USER" == "" ]; then
 	fi
 fi
 
-(printf "%-22s%s\n" "Location" "${WORK_PATH}" 1>&2)
-
 export IDN=$(echo ${SAMPLE} | awk -F'[[:blank:]_]' '{print $1}')
 export DNA=$(echo ${SAMPLE} | awk -F'[[:blank:]_]' '{print $2}')
 export LIB=$(echo ${SAMPLE} | awk -F'[[:blank:]_]' '{print $3}')
@@ -245,11 +243,16 @@ if ! mkdir -p ${SAMPLE_PATH}/slurm; then
 	exit 1
 fi
 
+(printf "%-22s%s\n" "Blocks" "$FASTQ_SPLITNM" 1>&2)
+(printf "%-22s%s\n" "Location" "${WORK_PATH}" 1>&2)
+
 (printf "%-22s" "Command" 1>&2)
 echo $0 ${@} | tee ${SAMPLE_PATH}/jobReSubmit.sh
 chmod +x ${SAMPLE_PATH}/jobReSubmit.sh
 
 date '+%Y%m%d_%H%M%S' >> ${WORK_PATH}/${IDN}/starttime.txt
+
+exit 0
 
 case $ENTRY_POINT in
 	RS)
@@ -339,7 +342,7 @@ case $ENTRY_POINT in
 			fi
 		else
 			alignInput=""
-			readBlocks="$FASTQ_SPLITNM"
+			readBlocks=${FASTQ_SPLITNM}
 		fi
 		
 		for i in $(seq 1 $readBlocks); do
