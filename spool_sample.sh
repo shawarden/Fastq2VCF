@@ -252,8 +252,6 @@ chmod +x ${SAMPLE_PATH}/jobReSubmit.sh
 
 date '+%Y%m%d_%H%M%S' >> ${WORK_PATH}/${IDN}/starttime.txt
 
-exit 0
-
 case $ENTRY_POINT in
 	RS)
 		##################################
