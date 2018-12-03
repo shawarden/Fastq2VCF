@@ -75,13 +75,9 @@ $(for file in ${PLATFORMS}/*.bed; do platFile=$(basename $file); platName=${plat
 *********************************" 1>&2)
 }
 
-while getopts "hb:c:e:f:g:i:mo:p:r:s:t:" OPTION
+while getopts "b:c:e:f:g:hi:mo:p:r:s:t:" OPTION
 do
 	case $OPTION in
-		h)
-			usage
-			exit 0
-			;;
 		b)
 			export FASTQ_SPLITNM="${OPTARG}"
 			(printf "%-22s%s\n" "Split Blocks" $FASTQ_SPLITNM 1>&2)
@@ -118,6 +114,10 @@ do
 					;;
 			esac
 			(printf "%-22s%s (%s)\n" "Gender" $GENDER "Warns on Autodetermination mismatch!" 1>&2)
+			;;
+		h)
+			usage
+			exit 0
 			;;
 		i)
 			if [ ! -e ${OPTARG} ]; then

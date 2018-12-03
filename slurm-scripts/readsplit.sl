@@ -53,9 +53,15 @@ while getopts "i:s:d:b:mo:p:" OPTION
 do
 	FILE=
 	case $OPTION in
+		b)
+			export FASTQ_SPLITNM="${OPTARG}"
+			(printf "%-22s%s\n" "Split Blocks" $FASTQ_SPLITNM 1>&2)
+			;;
 		i)
 			if [ ! -e ${OPTARG} ]; then
 				(echo "FAIL: Input file $OPTARG does not exist!" 1>&2)
+				# Print out input usage section.
+				usage | head -n 15 | tail -n 2
 				exit 1
 			fi
 			if [[ " ${FILE_LIST[@]} " =~ " ${OPTARG} " ]]
@@ -64,27 +70,25 @@ do
 				exit 1
 			fi
 			export FILE_LIST=(${FILE_LIST[@]} ${OPTARG})
-			(echo "input file $OPTARG" 1>&2)
-			;;
-		s)
-			export SAMPLE=${OPTARG}
-			(echo "sample $SAMPLE" 1>&2)
-			;;
-		b)
-			export FASTQ_MAXREAD=${OPTARG}
-			(echo "reads $FASTQ_MAXREAD" 1>&2)
+			(printf "%-22s%s\n" "Input file" $OPTARG 1>&2)
 			;;
 		m)
-			MULTI_RUN="-m"
-			(echo "multirun enabled" 1>&2)
+			export MULTI_RUN="-m"
+			(printf "%-22s%s (%s)\n" "Multiple runs" "Enabled" "Omit on final submission" 1>&2)
 			;;
 		p)
 			if [ ! -e $PLATFORMS/$OPTARG.bed ]; then
 				(echo "FAIL: Unable to located $PLATFORMS/$OPTARG.bed!" 1>&2)
+				# Print out platform usage section.
+				usage | head -n 31 | tail -n 13
 				exit 1
 			fi
 			export PLATFORM=${OPTARG}
 			(printf "%-22s%s (%s)\n" "Platform" $PLATFORM $(find $PLATFORMS/ -type f -iname "$PLATFORM.bed") 1>&2)
+			;;
+		s)
+			export SAMPLE=${OPTARG}
+			(printf "%-22s%s\n" "Sample ID" $SAMPLE 1>&2)
 			;;
 		*)
 			(echo "FAILURE: $0 ${OPTION} ${OPTARG} is not valid!" 1>&2)
