@@ -116,7 +116,7 @@ then
 
 fi
 
-CMD="srun $(which java) ${JAVA_ARGS} -cp $GATK_JAR ${GATK_ARGS} ${mergeList} -out ${OUTPUT}"
+CMD="srun -J ${IDN}_ConcatVariants $(which java) ${JAVA_ARGS} -cp $GATK_JAR ${GATK_ARGS} ${mergeList} -out ${OUTPUT}"
 (echo "$HEADER ${CMD}" | tee -a commands.txt 1>&2)
 
 JOBSTEP=0

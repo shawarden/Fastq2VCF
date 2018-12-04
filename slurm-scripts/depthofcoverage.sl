@@ -165,7 +165,7 @@ then
 
 fi
 
-CMD="srun $(which java) ${JAVA_ARGS} -jar $GATK_JAR ${GATK_ARGS} ${inputList} -o ${OUTPUT}"
+CMD="srun -J ${IDN}_Depth_${CONTIG}_$SLURM_ARRAY_TASK_ID $(which java) ${JAVA_ARGS} -jar $GATK_JAR ${GATK_ARGS} ${inputList} -o ${OUTPUT}"
 (echo "$HEADER: ${CMD}" | tee -a commands.txt 1>&2)
 
 JOBSTEP=0

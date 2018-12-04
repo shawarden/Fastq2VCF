@@ -111,7 +111,7 @@ if [ ! -e $INPUT_BAI ]; then
 	(echo "WARN: $INPUT_BAI does not exist. Creating..." 1>&2)
 	module load SAMtools
 	scontrol update jobid=${SLURM_ARRAY_JOB_ID}_${SLURM_ARRAY_TASK_ID} name=${IDN}_Indexing_BAM_${CONTIG}_$SLURM_ARRAY_TASK_ID
-	samtools index $INPUT $INPUT_BAI
+	srun -j ${IDN}_Indexing_BAM_${CONTIG}_$SLURM_ARRAY_TASK_ID samtools index $INPUT $INPUT_BAI
 fi
 
 
@@ -126,7 +126,7 @@ fi
 
 HEADER="BR"
 
-CMD="srun $(which java) ${JAVA_ARGS} -jar $GATK_JAR ${GATK_BSQR} -L ${CONTIG} ${GATK_ARGS} -I ${INPUT} -o ${BQSR}"
+CMD="srun -J =${IDN}_BaseRecal_${CONTIG}_$SLURM_ARRAY_TASK_ID $(which java) ${JAVA_ARGS} -jar $GATK_JAR ${GATK_BSQR} -L ${CONTIG} ${GATK_ARGS} -I ${INPUT} -o ${BQSR}"
 (echo "$HEADER: ${CMD}" | tee -a commands.txt 1>&2)
 
 JOBSTEP=0
@@ -143,7 +143,7 @@ SECONDS=0
 
 HEADER="PR"
 
-CMD="srun $(which java) ${JAVA_ARGS} -jar $GATK_JAR ${GATK_READ} -L ${CONTIG} ${GATK_ARGS} -I ${INPUT} -BQSR ${BQSR} -o ${OUTPUT}"
+CMD="srun -J ${IDN}_Printing_${CONTIG} $(which java) ${JAVA_ARGS} -jar $GATK_JAR ${GATK_READ} -L ${CONTIG} ${GATK_ARGS} -I ${INPUT} -BQSR ${BQSR} -o ${OUTPUT}"
 (echo "$HEADER: ${CMD}" | tee -a commands.txt 1>&2)
 
 JOBSTEP=1
