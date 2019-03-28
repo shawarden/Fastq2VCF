@@ -304,6 +304,11 @@ export   NUMCONTIG_BLOCKS=$((${#CONTIGBLOCKS[@]} - 1))
 [ -z $SLURM_JOB_CPUS_PER_NODE ] && SLURM_JOB_CPUS_PER_NODE=4
 [ -z $RAMDISK ] && RAMDISK=0
 
+# Assign java a portion of overall memory allocation
+# If --mem is used, $SLURM_MEM_PER_NODE will be defined.
+# Otherwise use $SLURM_MEM_PER_CPU * $SLURM_JOB_CPUS_PER_NODE
+# Subtract any expected $SHMDIR (aka $TMPDIR) disk usage and additional processes.
+
 export JAVA_MEM_GB=$(\
 	echo $RAMDISK $(\
 		[ -z $SLURM_MEM_PER_NODE ] && \

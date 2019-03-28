@@ -386,8 +386,8 @@ case $ENTRY_POINT in
 		else
 			mergeInput=""
 			mergeArray=""
-			for i in $(seq 1 ${NUMCONTIG_BLOCKS}); do
-				contig=${CONTIGBLOCKS[$i]}	# Does bash do array lookups every time too?
+			for i in $(seq 1 ${NUMCONTIGS}); do
+				contig=${CONTIGARRAY[$i]}	# Does bash do array lookups every time too?
 				#printf "%04d %-22s " $i $contig
 				mergeOutput=${SAMPLE_PATH}/markdup/${contig}.bam
 				mkdir -p $(dirname $mergeOutput)
@@ -427,8 +427,8 @@ case $ENTRY_POINT in
 		fi
 		
 		recalArray=""
-		for i in $(seq 1 ${NUMCONTIG_BLOCKS}); do
-			contig=${CONTIGBLOCKS[$i]}	# Does bash do array lookups every time too?
+		for i in $(seq 1 ${NUMCONTIGS}); do
+			contig=${CONTIGARRAY[$i]}	# Does bash do array lookups every time too?
 			#printf "%04d %-22s " $i $contig
 			recalOutput=${SAMPLE_PATH}/printreads/${contig}.bam
 			catReadsInputs=$(appendList "$catReadsInputs" "-i ${recalOutput}" " ")
@@ -529,8 +529,8 @@ case $ENTRY_POINT in
 		cd $SAMPLE_PATH	# Make sure we're in the right folder.
 		
 		depthArray=""
-		for i in $(seq 1 ${NUMCONTIG_BLOCKS}); do
-			contig=${CONTIGBLOCKS[$i]}	# Does bash do array lookups every time too?
+		for i in $(seq 1 ${NUMCONTIGS}); do
+			contig=${CONTIGARRAY[$i]}	# Does bash do array lookups every time too?
 			#printf "%04d %-22s " $i $contig
 			
 			depthOutput=${SAMPLE_PATH}/depth/${contig} #.sample_summary
@@ -579,9 +579,9 @@ case $ENTRY_POINT in
 		
 		# Loop though number of contigs in reference sequence.
 		# Build list of incomplete merged contigs.
-		for i in $(seq 1 ${NUMCONTIG_BLOCKS}); do
+		for i in $(seq 1 ${NUMCONTIGS}); do
 			# Build input/output file names
-			contig=${CONTIGBLOCKS[$i]}	# Does bash do array lookups every time too?
+			contig=${CONTIGARRAY[$i]}	# Does bash do array lookups every time too?
 			#printf "%04d %-22s " $i $contig
 			
 			haploOutput=${SAMPLE_PATH}/haplo/${contig}.${FINAL_TYPE}.gz
@@ -654,7 +654,7 @@ case $ENTRY_POINT in
 		(printf "%-22s" "HaplotypeCaller XPAR1" 1>&2)
 		
 		if [ ! -e ${SAMPLE_PATH}/${haploXPar1Output}.done ]; then
-			DEP_HCXPAR1=$(sbatch $(dispatch "HC") -J HC_${IDN}_XPAR1 --array=90 $(depCheck $DEP_GD) $SLSBIN/haplotypecaller.sl  -c "$XPAR1" $depthInput | awk '{print $4}')
+			DEP_HCXPAR1=$(sbatch $(dispatch "HC") -J HC_${IDN}_XPAR1 --array=996 $(depCheck $DEP_GD) $SLSBIN/haplotypecaller.sl  -c "$XPAR1" $depthInput | awk '{print $4}')
 			if [ $? -ne 0 ] || [ "$DEP_HCXPAR1" == "" ]; then
 				(printf "FAILED!\n"  1>&2)
 				exit 1
@@ -669,7 +669,7 @@ case $ENTRY_POINT in
 		(printf "%-22s" "HaplotypeCaller TRUEX" 1>&2)
 		
 		if [ ! -e ${SAMPLE_PATH}/${haploTRUEXOutput}.done ]; then
-			DEP_HCTRUEX=$(sbatch $(dispatch "HC") -J HC_${IDN}_TRUEX --array=91 $(depCheck $DEP_GD) $SLSBIN/haplotypecaller.sl -c "$TRUEX" $depthInput | awk '{print $4}')
+			DEP_HCTRUEX=$(sbatch $(dispatch "HC") -J HC_${IDN}_TRUEX --array=997 $(depCheck $DEP_GD) $SLSBIN/haplotypecaller.sl -c "$TRUEX" $depthInput | awk '{print $4}')
 			if [ $? -ne 0 ] || [ "$DEP_HCTRUEX" == "" ]; then
 				(printf "FAILED!\n" 1>&2)
 				exit 1
@@ -684,7 +684,7 @@ case $ENTRY_POINT in
 		(printf "%-22s" "HaplotypeCaller XPAR2" 1>&2)
 		
 		if [ ! -e ${SAMPLE_PATH}/${haploXPar2Output}.done ]; then
-			DEP_HCXPAR2=$(sbatch $(dispatch "HC") -J HC_${IDN}_XPAR2 --array=92 $(depCheck $DEP_GD) $SLSBIN/haplotypecaller.sl -c "$XPAR2" $depthInput | awk '{print $4}')
+			DEP_HCXPAR2=$(sbatch $(dispatch "HC") -J HC_${IDN}_XPAR2 --array=998 $(depCheck $DEP_GD) $SLSBIN/haplotypecaller.sl -c "$XPAR2" $depthInput | awk '{print $4}')
 			if [ $? -ne 0 ] || [ "$DEP_HCXPAR2" == "" ]; then
 				(printf "FAILED!\n" 1>&2)
 				exit 1
@@ -699,7 +699,7 @@ case $ENTRY_POINT in
 		(printf "%-22s" "HaplotypeCaller Y" 1>&2)
 		
 		if [ ! -e ${SAMPLE_PATH}/${haploYOutput}.done ]; then
-			DEP_HCY=$(sbatch $(dispatch "HC") -J HC_${IDN}_Y --array=93 $(depCheck $DEP_GD) ${SLSBIN}/haplotypecaller.sl -c "Y" $depthInput | awk '{print $4}')
+			DEP_HCY=$(sbatch $(dispatch "HC") -J HC_${IDN}_Y --array=999 $(depCheck $DEP_GD) ${SLSBIN}/haplotypecaller.sl -c "Y" $depthInput | awk '{print $4}')
 			if [ $? -ne 0 ] || [ "$DEP_HCY" == "" ]; then
 				(printf "FAILED!\n" 1>&2)
 				exit 1

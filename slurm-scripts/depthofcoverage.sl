@@ -110,6 +110,7 @@ if [ "${#FILE_LIST[@]}" -lt "1" ]; then
 	INPUT=printreads/${CONTIG}.bam
 	if ! inFile;  then exit $EXIT_IO; fi
 	inputList="-I $INPUT"
+	inputFile="$INPUT"
 else
 	for INPUT in ${FILE_LIST[@]}; do
 		if ! inFile; then exit $EXIT_IO; fi
@@ -154,28 +155,37 @@ GATK_ARGS="-T ${GATK_PROC} \
 --omitIntervalStatistics \
 -nt ${SLURM_JOB_CPUS_PER_NODE}"
 
-module load Java/1.8.0_144
-
-
-if [ -z $GATK_JAR ]
+module load SAMtools
+if [ "$(which samtools) view ${inputFile} | head | wc -l" -gt 0 ]
 then
-	(echo "Loading GATK Module" 1>&2)
-	module load GATK
-	GATK_JAR=$EBROOTGATK/GenomeAnalysisTK.jar
+
+	module load Java/1.8.0_144
+
+	if [ -z $GATK_JAR ]
+	then
+		(echo "Loading GATK Module" 1>&2)
+		module load GATK
+		GATK_JAR=$EBROOTGATK/GenomeAnalysisTK.jar
+
+	fi
+
+	CMD="srun -J ${IDN}_Depth_${CONTIG}_$SLURM_ARRAY_TASK_ID $(which java) ${JAVA_ARGS} -jar $GATK_JAR ${GATK_ARGS} ${inputList} -o ${OUTPUT}"
+	(echo "$HEADER: ${CMD}" | tee -a commands.txt 1>&2)
+
+	JOBSTEP=0
+
+	scontrol update jobid=${SLURM_ARRAY_JOB_ID}_${SLURM_ARRAY_TASK_ID} name=${IDN}_Depth_${CONTIG}_$SLURM_ARRAY_TASK_ID
+
+	if ! ${CMD}; then
+		cmdFailed $?
+		exit ${JOBSTEP}${EXIT_PR}
+	fi
+else
+	(echo "$HEADER: Input file ${inputFile} is empty."
+	echo -e "sample_id\ttotal\tmean\tgranular_third_quartile\tgranular_median\tgranular_first_quartile\t%_bases_above_15
+${IDN}\t0\t0.0\t0\t0\t0\t0.0
+Total\t0\t0.0\tN/A\tN/A\tN/A" > ${OUTPUT}.sample_summary
 
 fi
-
-CMD="srun -J ${IDN}_Depth_${CONTIG}_$SLURM_ARRAY_TASK_ID $(which java) ${JAVA_ARGS} -jar $GATK_JAR ${GATK_ARGS} ${inputList} -o ${OUTPUT}"
-(echo "$HEADER: ${CMD}" | tee -a commands.txt 1>&2)
-
-JOBSTEP=0
-
-scontrol update jobid=${SLURM_ARRAY_JOB_ID}_${SLURM_ARRAY_TASK_ID} name=${IDN}_Depth_${CONTIG}_$SLURM_ARRAY_TASK_ID
-
-if ! ${CMD}; then
-	cmdFailed $?
-	exit ${JOBSTEP}${EXIT_PR}
-fi
-
 
 touch ${OUTPUT}.done
