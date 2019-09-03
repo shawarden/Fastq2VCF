@@ -19,6 +19,16 @@
 
 # Update history
 
+## 2019-09-02
+
+### Fixed
+
+- Contig blocks sort order
+
+### Added
+
+- PCR Free option via local contigs
+
 ## 2018-11-05
 
 ### Fixed

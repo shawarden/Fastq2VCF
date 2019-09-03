@@ -102,7 +102,7 @@ if [ "${SAMPLE}" == "" ] || [ "${PLATFORM}" == "" ]; then
 	exit 1
 fi
 
-CONTIG=${CONTIGBLOCKS[$SLURM_ARRAY_TASK_ID]}
+CONTIG=${CONTIGARRAY[$SLURM_ARRAY_TASK_ID]}
 
 inputList=""
 
@@ -156,7 +156,7 @@ GATK_ARGS="-T ${GATK_PROC} \
 -nt ${SLURM_JOB_CPUS_PER_NODE}"
 
 module load SAMtools
-if [ "$(which samtools) view ${inputFile} | head | wc -l" -gt 0 ]
+if [ $($(which samtools) view ${inputFile} | head | wc -l) -gt 0 ] 
 then
 
 	module load Java/1.8.0_144
@@ -181,7 +181,7 @@ then
 		exit ${JOBSTEP}${EXIT_PR}
 	fi
 else
-	(echo "$HEADER: Input file ${inputFile} is empty."
+	(echo "$HEADER: Input file ${inputFile} is empty." 1>&2) 
 	echo -e "sample_id\ttotal\tmean\tgranular_third_quartile\tgranular_median\tgranular_first_quartile\t%_bases_above_15
 ${IDN}\t0\t0.0\t0\t0\t0\t0.0
 Total\t0\t0.0\tN/A\tN/A\tN/A" > ${OUTPUT}.sample_summary

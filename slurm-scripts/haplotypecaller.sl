@@ -8,7 +8,7 @@
 #SBATCH --output	slurm/HC_%A_%a.out
 
 (echo "$(date) on $(hostname)" 1>&2)
-(echo $0 $* 1>&2)
+(echo $0 $@ 1>&2)
 
 if [ -e $EXEDIR/baserefs.sh ]
 then
@@ -59,7 +59,7 @@ do
 			;;
 		c)
 			export CONTIG=${OPTARG}
-			(printf "%-22s%s (%s)\n" "Contig" $CONTIG>&2)
+			(printf "%-22s%s\n" "Contig" $CONTIG>&2)
 			;;
 		r)
 			export REF=${OPTARG}
@@ -104,7 +104,7 @@ do
 done
 
 if [ "$CONTIG" == "" ]; then
-	CONTIG=${CONTIGBLOCKS[$SLURM_ARRAY_TASK_ID]}
+	CONTIG=${CONTIGARRAY[$SLURM_ARRAY_TASK_ID]}
 fi
 
 HEADER="HC"
@@ -187,7 +187,7 @@ then
 
 fi
 
-CMD="srun -J {IDN}_Haplotyping_${CONTIG}_$SLURM_ARRAY_TASK_ID $(which java) ${JAVA_ARGS} -jar $GATK_JAR ${GATK_ARGS} ${inputList} -o ${OUTPUT}"
+CMD="srun -J {IDN}_Haplotyping_${CONTIG}_$SLURM_ARRAY_TASK_ID $(which java) ${JAVA_ARGS} -jar $GATK_JAR ${GATK_ARGS} ${HAPLO_PCRFREE} ${inputList} -o ${OUTPUT}"
 (echo "$HEADER ${CMD}" | tee -a commands.txt 1>&2)
 
 JOBSTEP=0

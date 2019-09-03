@@ -83,7 +83,7 @@ do
 	esac
 done
 
-CONTIG=${CONTIGBLOCKS[$SLURM_ARRAY_TASK_ID]}
+CONTIG=${CONTIGARRAY[$SLURM_ARRAY_TASK_ID]}
 
 # INPUT is either specified single file or contig dependent entry.
 [ "${#FILE_LIST[@]}" -lt "1" ] && \

@@ -1,12 +1,15 @@
 #!/bin/bash
 #r
 ###########
-# Base Reference file contains everything I don't want to retype in every script.
+# Base Reference file contains everything I don't want to retype in
+# every script.
 #
-# include: "source /path/to/baserefs.sh" at the top of pretty much every script to import these values.
+# include: "source /path/to/baserefs.sh" at the top of pretty much every
+# script to import these values.
 ###########
 
-# Merge exit codes from piped commands so any command that fails carries to $?
+# Merge exit codes from piped commands so any command that fails carries
+# to $?
 set -o pipefail
 
 if [ -e $HOME/fq2vcf.sh ]
@@ -38,13 +41,6 @@ else
 	export       INDELS=${BUNDLE}/1000G_phase1.indels.b37.vcf
 	export     REF_CORE=${BUNDLE}/human_g1k_v37_decoy
 	[ -z $REF ] && export REF=$REF_CORE
-
-	#export       COMMON=${RESOURCES}/Hapmap3_3commonvariants.vcf
-	#export       BUNDLE=${RESOURCES}/v0
-	#export        DBSNP=${BUNDLE}/Homo_sapiens_assembly38.dbsnp138.vcf
-	#export        MILLS=${BUNDLE}/Mills_and_1000G_gold_standard.indels.hg38.vcf.gz
-	#export       INDELS=${BUNDLE}/1000G_phase1.snps.high_confidence.hg38.vcf.gz
-	#export          REF=${BUNDLE}/Homo_sapiens_assembly38
 
 	export         REFA=${REF}.fasta
 	export JOB_TEMP_DIR=$TMPDIR
@@ -232,6 +228,8 @@ else
 	#export XPAR1="chrX:10000-2781479"
 	#export XPAR2="chrX:155701382-156030895"
 	#export TRUEX="chrX:2781480-155701381"
+
+	export HAPLO_PCRFREE="--pcr_indel_model NONE" # NONE, HOSTILE, AGGRESSIVE or CONSERVATIVE
 fi
 
 export SLURM_VERSION=$(scontrol -V | awk '{print $2}')

@@ -138,7 +138,7 @@ ren='^[0-9]+$'
 
 printf "#%-10s %8s %s\n" "Chromosome" "Coverage" "Count" | tee -a ${OUTPUT}
 
-for contig in ${CONTIGBLOCKS[@]}; do
+for contig in ${CONTIGARRAY[@]}; do
 	if [ "$contig" != "MT" ] && [ "$contig" != "hs37d5" ] && [ "$contig" != "NC_007605" ] && [[ $contig != GL* ]]; then
 		INPUT=${SAMPLE_PATH}/depth/${contig}.sample_summary
 		if [ ! -e ${INPUT} ]; then
