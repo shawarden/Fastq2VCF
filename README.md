@@ -23,7 +23,7 @@
 
 ### Fixed
 
-- Illumina platinum readgroups have spacer in funny places.
+- Illumina platinum readgroups have spaces in funny places.
 
 ## 2019-09-02
 
