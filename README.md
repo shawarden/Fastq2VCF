@@ -19,6 +19,12 @@
 
 # Update history
 
+## 2019-09-12
+
+### Fixed
+
+- Illumina platinum readgroups have spacer in funny places.
+
 ## 2019-09-02
 
 ### Fixed

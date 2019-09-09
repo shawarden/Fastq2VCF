@@ -130,7 +130,8 @@ else
 	[ -e ${RUN_PATH}/blocks/R2_${BLOCK}.fastq.gz ] && READ2=${RUN_PATH}/blocks/R2_${BLOCK}.fastq.gz
 fi
 
-READGROUP=$($CAT_CMD $READ1 | head -1 | awk -F'[@:]' '{print $2"_"$3"_"$4"_"$5"_"$11}' )
+# Trim spaces from funny fastqs: illumina platinum collection
+READGROUP=$($CAT_CMD $READ1 | head -1 | sed -n 's/ /\./g' | awk -F'[@:]' '{print $2"_"$3"_"$4"_"$5"_"$11}' )
 
 (echo "$HEADER: $READGROUP $BLOCK $READ1 $READ2 -> $OUTPUT" 1>&2)
 jobStats
@@ -148,13 +149,13 @@ if ! outDirs; then exit $EXIT_IO; fi
 #if ! outFile; then exit $EXIT_IO; fi
 
 # Get readgroup blocks from either INFO_INFO_INFO_.. or INFO INFO INFO ...
-	 INTRUMENT=$(echo ${READGROUP} | awk -F'[[:blank:]_]' '{print $1}')
-INSTRUMENT_RUN=$(echo ${READGROUP} | awk -F'[[:blank:]_]' '{print $2}')
-	 FLOW_CELL=$(echo ${READGROUP} | awk -F'[[:blank:]_]' '{print $3}')
-	 CELL_LANE=$(echo ${READGROUP} | awk -F'[[:blank:]_]' '{print $4}')
-		 INDEX=$(echo ${READGROUP} | awk -F'[[:blank:]_]' '{print $5}')
+	INSTRUMENT=$(echo ${READGROUP} | awk -F'_' '{print $1}')
+INSTRUMENT_RUN=$(echo ${READGROUP} | awk -F'_' '{print $2}')
+	 FLOW_CELL=$(echo ${READGROUP} | awk -F'_' '{print $3}')
+	 CELL_LANE=$(echo ${READGROUP} | awk -F'_' '{print $4}')
+		 INDEX=$(echo ${READGROUP} | awk -F'_' '{print $5}')
 
-RG_ID="ID:${INTRUMENT}_${INSTRUMENT_RUN}_${FLOW_CELL}_${CELL_LANE}_${INDEX}"
+RG_ID="ID:${INSTRUMENT}_${INSTRUMENT_RUN}_${FLOW_CELL}_${CELL_LANE}_${INDEX}"
 RG_PL="PL:Illumina"
 RG_PU="PU:${FLOW_CELL}.${CELL_LANE}"
 RG_LB="LB:${SAMPLE}"
