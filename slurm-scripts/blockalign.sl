@@ -171,7 +171,7 @@ module load BWA
 module load SAMtools
 
 # Pipe output from alignment into sortsam
-CMD="srun -J ${SAMPLE}_Aligning_${BLOCK} $(which bwa) mem -M -t ${SLURM_JOB_CPUS_PER_NODE} -R @RG'\t'$RG_ID'\t'$RG_PL'\t'$RG_PU'\t'$RG_LB'\t'$RG_SM $BWA_REF $READ1 $READ2 | $(which samtools) view -bh - > $BWA_OUT"
+CMD="srun -J ${SAMPLE}_Aligning_${BLOCK} $(which bwa) mem -M -t ${SLURM_JOB_CPUS_PER_NODE} -Y -R @RG'\t'$RG_ID'\t'$RG_PL'\t'$RG_PU'\t'$RG_LB'\t'$RG_SM $BWA_REF $READ1 $READ2 | $(which samtools) view -bh - > $BWA_OUT"
 (echo "$HEADER: ${CMD}" | tee -a ../commands.txt 1>&2)
 
 scontrol update jobid=${SLURM_ARRAY_JOB_ID}_${SLURM_ARRAY_TASK_ID} name=${SAMPLE}_Aligning_${BLOCK}
