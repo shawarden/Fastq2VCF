@@ -19,6 +19,12 @@
 
 # Update history
 
+## 2019-10-31
+
+### Fixed
+
+- sed quiet doesn't produce any output, resulting in no readgroups.
+
 ## 2019-09-12
 
 ### Fixed
@@ -71,7 +77,7 @@
 - Exclude version folders from tarball
 
 ### Fixed
-- Reference dictionary location. 
+- Reference dictionary location.
 
 ## 2018-06-11
 

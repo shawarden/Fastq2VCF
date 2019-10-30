@@ -107,7 +107,7 @@ fi
 
 # Block depends on input or array id.
 export BLOCK=$(printf "%0${FASTQ_MAXZPAD}d" $SLURM_ARRAY_TASK_ID)
-   
+
 export BWA_OUT=${TMPDIR}/align_${BLOCK}.bam
 export PIC_OUT=${TMPDIR}/sorted_${BLOCK}.bam
  OUTPUT=${RUN_PATH}/split/${BLOCK}/contig_split
@@ -131,7 +131,7 @@ else
 fi
 
 # Trim spaces from funny fastqs: illumina platinum collection
-READGROUP=$($CAT_CMD $READ1 | head -1 | sed -n 's/ /\./g' | awk -F'[@:]' '{print $2"_"$3"_"$4"_"$5"_"$11}' )
+READGROUP=$($CAT_CMD $READ1 | head -1 | sed -e 's/ /\./g' | awk -F'[@:]' '{print $2"_"$3"_"$4"_"$5"_"$11}' )
 
 (echo "$HEADER: $READGROUP $BLOCK $READ1 $READ2 -> $OUTPUT" 1>&2)
 jobStats
@@ -155,6 +155,16 @@ INSTRUMENT_RUN=$(echo ${READGROUP} | awk -F'_' '{print $2}')
 	 CELL_LANE=$(echo ${READGROUP} | awk -F'_' '{print $4}')
 		 INDEX=$(echo ${READGROUP} | awk -F'_' '{print $5}')
 
+if  [ -z $INSTRUMENT ] || \
+	[ -z $INSTRUMENT_RUN ] || \
+	[ -z $FLOW_CELL ] || \
+	[ -z $CELL_LANE ] || \
+	[ -z $INDEX ]
+then
+	(echo "$HEADER: FAILURE: Unable to pull readgroup: $READGROUP" 1>&2)
+	exit 1
+fi
+
 RG_ID="ID:${INSTRUMENT}_${INSTRUMENT_RUN}_${FLOW_CELL}_${CELL_LANE}_${INDEX}"
 RG_PL="PL:Illumina"
 RG_PU="PU:${FLOW_CELL}.${CELL_LANE}"
@@ -166,7 +176,7 @@ echo $REFA | grep 38 && BWA_REF=$REFA || BWA_REF=$REF
 HEADER="PA"
 JOBSTEP=0
 (echo "$HEADER: Aligning! $BWA_REF" 1>&2)
-	
+
 module load BWA
 module load SAMtools
 
@@ -190,7 +200,7 @@ HEADER="SS"
 JOBSTEP=1
 
 module load picard
-	
+
 CMD="srun -J ${SAMPLE}_Sorting_${BLOCK} $(which java) ${JAVA_ARGS} -jar $EBROOTPICARD/picard.jar SortSam ${PIC_ARGS} ${SORT_ARGS} INPUT=$BWA_OUT OUTPUT=$PIC_OUT"
 (echo "$HEADER: ${CMD}" | tee -a ../commands.txt 1>&2)
 
@@ -235,7 +245,7 @@ SECONDS=$(($SECONDS + $SS_SECONDS + $PA_SECONDS))
 rm $PIC_OUT && (echo "$HEADER: Purged sorted block: $SHM_DIR/sorted_${BLOCK}.bam" 1>&2)
 
 # Remove input files.
-if [ "${#FILE_LIST[@]}" -lt "1" ]; then 
+if [ "${#FILE_LIST[@]}" -lt "1" ]; then
 	rm ${READ1} ${READ2} && (echo "$HEADER: Purged source read block files!" 1>&2)
 fi
 
