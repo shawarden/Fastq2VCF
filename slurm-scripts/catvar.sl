@@ -2,7 +2,7 @@
 #SBATCH --job-name	CatVariants
 #SBATCH --time		359
 #SBATCH --mem		16G
-#SBATCH --cpus-per-task	1
+#SBATCH --cpus-per-task	4
 #SBATCH --error		slurm/CV_%j.out
 #SBATCH --output	slurm/CV_%j.out
 
@@ -92,7 +92,7 @@ mergeList=""
 for INPUT in ${FILE_LIST[@]}; do
 	if ! inFile; then
 		exit $EXIT_IO
-	else 
+	else
 		mergeList="${mergeList} -V ${INPUT}"
 	fi
 done
